@@ -95,8 +95,8 @@ result_path = "../../result/GNN"
 # os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = ctd
 os.environ["CUDA_VISIBLE_DEVICES"] = ctd
 use_cuda = not no_cuda and torch.cuda.is_available()
-# device = torch.device('cuda' if use_cuda else 'cpu')
-device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+device = torch.device('cuda' if use_cuda else 'cpu')
+# device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 print("Cuda Available:{}, use {}!".format(use_cuda, device))
 # print("mps Available:{}, use {}!".format(use_mps, device))
 

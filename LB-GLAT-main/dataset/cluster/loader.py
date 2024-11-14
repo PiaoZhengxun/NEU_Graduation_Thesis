@@ -37,6 +37,34 @@ def get_dataset_list(seed):
 
 def get_data(classes, edges, nodes):
     classes, edges, nodes = create_index(classes, edges, nodes)  # create index
+
+    ###########################################################
+    print("dataset.cluster.loader.py >> get_data function undirected format 11111****")
+    ##ValueError XXXX
+    # reverse_edges = edges[[1,0], :]
+    # edges = np.concatenate((edges, reverse_edges), axis =1 )
+
+    #test2
+    # edges = np.array(edges)
+    # reverse_edges = edges[[1, 0], :]
+    # print("original edge shape:", edges.shape)
+    # print("reversed edges shape:", reverse_edges.shape)
+    #
+    # edges = np.concatenate((edges, reverse_edges), axis=1)
+
+    #test3 ==> shape of 2N x 2
+    # reverse_edges = edges[:, [1, 0]]
+    # print("original edge shape:", edges.shape)
+    # print("reversed edges shape:", reverse_edges.shape)
+    # edges = np.concatenate((edges, reverse_edges), axis=0)
+
+    #use TRANSPOSE
+    print("original edge shape:", edges.shape)
+    edges = edges.T
+    reverse_edges = edges[[1, 0], :]
+    print("reversed edges shape:", reverse_edges.shape)
+    edges = np.concatenate((edges, reverse_edges), axis=1)
+    ###########################################################
     classes = classes[:, 1]
     nodes = nodes[:, 2:]
     class_tensor, edge_tensor, node_tensor = to_tensor(classes, edges, nodes)
@@ -48,13 +76,13 @@ def get_data(classes, edges, nodes):
 
 
 def down_sampling_mask(classes, train_mask):
-    """Narrow the positive and negative sample gap"""
+    """Narrow the positive and negative sample  gap"""
     down_sampling = get_config_option("dataset", "Elliptic", "down_sampling") == str(True)
     if down_sampling:
         rs_NP_ratio = float(get_config_option("dataset", "Elliptic", "rs_NP_ratio"))
         P_num = (classes[train_mask] == 0).sum()  # the number of positive samples
         N_num = (classes[train_mask] == 1).sum()  # the number of negative samples
-        if N_num <= math.floor(P_num * rs_NP_ratio):   # The number of negative samples is less than or equal to the expected negative samples
+        if N_num <= math.floor(P_num * rs_NP_ratio):   # The number of negative samplesis less than or equal to the expected negative samples
             return train_mask
         # Otherwise, under sampling
         Neg_index = np.where(classes[train_mask] == 1)[0]
