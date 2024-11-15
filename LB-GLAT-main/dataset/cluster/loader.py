@@ -78,22 +78,22 @@ def get_data(classes, edges, nodes):
     # ###########################################################
 
     ## transpose add tqdm loading bar
-    print("original edge shape:", edges.shape)
+    print("디버그11111 original edge shape:", edges.shape)
     print("Transposing edges...")
     for i in range(101):
         show_loading_bar(i)
     edges = edges.T
-    print("\nEdges transposed. Shape:", edges.shape)
+    print("디버깅2222 ::Edges shape after transpose: ", edges.shape, "\nEdges transposed. Shape:", edges.shape)
     print("Creating reversed edges...")
     reverse_edges = np.array([edges[1], edges[0]])
     for i in range(101):
         show_loading_bar(i)
-    print("\nReversed edges shape:", reverse_edges.shape)
+    print("디버깅 333333 \nReversed edges shape:", reverse_edges.shape)
     print("Concatenating edges...")
     edges = np.concatenate((edges, reverse_edges), axis=1)
     for i in range(101):
         show_loading_bar(i)
-    print("\nConcatenation complete. Final edges shape:", edges.shape)
+    print("디버깅 444444 \nConcatenation complete. Final edges shape:", edges.shape)
     ###########################################################
 
     classes = classes[:, 1]

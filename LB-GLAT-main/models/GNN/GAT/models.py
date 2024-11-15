@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -20,7 +19,56 @@ from utils.common_utils import setup_seed
     4. Bi-graph + GAT + Long-term Layer Attention + Fully Connection Layers
 """
 
+class GATsBlock(nn.Module):
+    """GAT part"""
 
+    def __init__(self, layer_num, n_features, gnns_hidden: Tensor, do_bn, dropout, bias):
+        super(GATsBlock, self).__init__()
+        dims = [n_features] + gnns_hidden.tolist()  # dims length = layer_num+1
+        self.gats = nn.ModuleList([
+            GATBlock(dims[i], dims[i + 1], do_bn, dropout, bias) for i in range(layer_num)  # Build layer i+1 GAT
+        ])
+
+    def forward(self, x, edge_index, mask):
+        # print("GATsBlock Debugging:")
+        # print("Input Features Shape (x):", x.shape)
+        # print("Edge Index Shape Before GAT:", edge_index.shape)
+
+
+        # #######convert
+        # if edge_index.shape[0] != 2:
+        #     from torch_geometric.utils import dense_to_sparse
+        #     print("dense edge_index를 sparse format으로 변경")
+        #     edge_index, _ = dense_to_sparse(edge_index)
+
+        h = []  # 记录每次Relu(GAT)后的结果
+        for gat in self.gats:
+            x = gat(x, edge_index)
+            h.append(x[mask])
+        return h
+
+class GATBlock(nn.Module):
+    def __init__(self, in_features, out_features, do_bn, dropout, bias=True):
+        super(GATBlock, self).__init__()
+        # setup_seed(seed)
+        self.gat = GATConv(in_features, out_features, bias=bias)
+        self.do_bn = do_bn
+        if do_bn:
+            self.bn = nn.BatchNorm1d(out_features)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x, edge_index):
+        # print("GATBlock Debugging:")
+        # print("Input Features Shape:", x.shape)
+        # print("Edge Index Shape Inside GATBlock:", edge_index.shape)
+
+        h = self.gat(x, edge_index)
+        if self.do_bn:
+            h = self.bn(h)
+        h = self.relu(h)
+        h = self.dropout(h)
+        return h
 class GATFCModel(nn.Module):
     """
     1. GAT + Fully Connection Layers
@@ -93,8 +141,8 @@ class BiGATFCModel(nn.Module):
         h_2_2 = self.fc_path2(RDGh[-1])  # (batch, n_classes): not softmax
         # Merge separate batches
         h_1 = torch.mul(mask_1.repeat(1, h_1.shape[1]), h_1)
-        h_2_1 = torch.mul(mask_2.repeat(1, h_2_1.shape[1]), h_2_1)  
-        h_2_2 = torch.mul(mask_3.repeat(1, h_2_2.shape[1]), h_2_2)  
+        h_2_1 = torch.mul(mask_2.repeat(1, h_2_1.shape[1]), h_2_1)
+        h_2_2 = torch.mul(mask_3.repeat(1, h_2_2.shape[1]), h_2_2)
         h = h_1 + h_2_1 + h_2_2  # (batch, n_classes): not softmax
         return h
 
@@ -203,45 +251,7 @@ class BiGATLTLAFCModel(nn.Module):
         h_2_2 = self.fc_path2(RDGh)  # (batch, n_classes): not softmax
         # Merge separate batches
         h_1 = torch.mul(mask_1.repeat(1, h_1.shape[1]), h_1)
-        h_2_1 = torch.mul(mask_2.repeat(1, h_2_1.shape[1]), h_2_1)  
-        h_2_2 = torch.mul(mask_3.repeat(1, h_2_2.shape[1]), h_2_2)  
+        h_2_1 = torch.mul(mask_2.repeat(1, h_2_1.shape[1]), h_2_1)
+        h_2_2 = torch.mul(mask_3.repeat(1, h_2_2.shape[1]), h_2_2)
         h = h_1 + h_2_1 + h_2_2  # (batch, n_classes): not softmax
-        return h
-
-
-class GATsBlock(nn.Module):
-    """GAT part"""
-
-    def __init__(self, layer_num, n_features, gnns_hidden: Tensor, do_bn, dropout, bias):
-        super(GATsBlock, self).__init__()
-        dims = [n_features] + gnns_hidden.tolist()  # dims length = layer_num+1
-        self.gats = nn.ModuleList([
-            GATBlock(dims[i], dims[i + 1], do_bn, dropout, bias) for i in range(layer_num)  # Build layer i+1 GAT
-        ])
-
-    def forward(self, x, edge_index, mask):
-        h = []  # 记录每次Relu(GAT)后的结果
-        for gat in self.gats:
-            x = gat(x, edge_index)
-            h.append(x[mask])
-        return h
-
-
-class GATBlock(nn.Module):
-    def __init__(self, in_features, out_features, do_bn, dropout, bias=True):
-        super(GATBlock, self).__init__()
-        # setup_seed(seed)
-        self.gat = GATConv(in_features, out_features, bias=bias)
-        self.do_bn = do_bn
-        if do_bn:
-            self.bn = nn.BatchNorm1d(out_features)
-        self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(dropout)
-
-    def forward(self, x, edge_index):
-        h = self.gat(x, edge_index)
-        if self.do_bn:
-            h = self.bn(h)
-        h = self.relu(h)
-        h = self.dropout(h)
         return h

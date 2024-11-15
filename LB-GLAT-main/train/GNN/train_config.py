@@ -95,16 +95,21 @@ result_path = "../../result/GNN"
 os.environ["CUDA_VISIBLE_DEVICES"] = ctd
 
 # Check for device availability
-if torch.backends.mps.is_available():
-    device = torch.device("mps")
-    print(f"MPS Available, using device: {device}")
-elif torch.cuda.is_available():
-    use_cuda = not no_cuda
-    device = torch.device('cuda' if use_cuda else 'cpu')
-    print(f"Cuda Available: {use_cuda}, using device: {device}")
-else:
-    device = torch.device("cpu")
-    print(f"No MPS or CUDA available, using device: {device}")
+# if torch.backends.mps.is_available():
+#     device = torch.device("mps")
+#     print(f"MPS Available, using device: {device}")
+# elif torch.cuda.is_available():
+#     use_cuda = not no_cuda
+#     device = torch.device('cuda' if use_cuda else 'cpu')
+#     print(f"Cuda Available: {use_cuda}, using device: {device}")
+# else:
+#     device = torch.device("cpu")
+#     print(f"No MPS or CUDA available, using device: {device}")
+
+# cuda
+use_cuda = not no_cuda and torch.cuda.is_available()
+device = torch.device('cuda' if use_cuda else 'cpu')
+print("Cuda Available:{}, use {}!".format(use_cuda, device))
 
 
 # use_mps = torch.backends.mps.is_available()
