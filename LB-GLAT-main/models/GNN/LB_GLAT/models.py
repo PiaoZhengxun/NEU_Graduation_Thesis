@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from models.GNN.GCN.models import GCNsBlock
+from models.GNN.GAT.models import GATsBlock  # Changed import from GCNsBlock to GATsBlock
 from models.GNN.LB_GLAT.layers import *
 from models.GNN.common import *
 
@@ -15,10 +15,10 @@ class LBGLATModel(nn.Module):
         super(LBGLATModel, self).__init__()
         self.device = device
         # Long-Term Layer Attention Network
-        self.DGcn = GCNsBlock(layer_num=gnn_forward_layer_num, n_features=n_features, gnns_hidden=gnns_forward_hidden,
-                              do_bn=gnn_do_bn, dropout=gnn_dropout, bias=bias)  # Build the GCN of the forward graph
-        self.RDGcn = GCNsBlock(layer_num=gnn_reverse_layer_num, n_features=n_features, gnns_hidden=gnns_reverse_hidden,
-                               do_bn=gnn_do_bn, dropout=gnn_dropout, bias=bias)  # Build the GCN of the reverse graph
+        self.DGcn = GATsBlock(layer_num=gnn_forward_layer_num, n_features=n_features, gnns_hidden=gnns_forward_hidden,
+                              do_bn=gnn_do_bn, dropout=gnn_dropout, bias=bias)  # Build the GAT of the forward graph
+        self.RDGcn = GATsBlock(layer_num=gnn_reverse_layer_num, n_features=n_features, gnns_hidden=gnns_reverse_hidden,
+                               do_bn=gnn_do_bn, dropout=gnn_dropout, bias=bias)  # Build the GAT of the reverse graph
 
         # Long-Term Layer Attention
         self.patches_forward_dim = [n_features] + gnns_forward_hidden.tolist()
@@ -61,7 +61,7 @@ class LBGLATModel(nn.Module):
             coo_adj_T = sparse_mx_to_torch_sparse_tensor(coo_adj_T).to_dense().to(self.device)
         else:
             coo_adj_T = sparse_mx_to_torch_sparse_tensor(coo_adj_T).to(self.device)
-        # GCN
+        # GAT
         DGh = self.DGcn(x, coo_adj, mask)  # gnn_layer_num * (batch, gnns_hidden[-1])
         RDGh = self.RDGcn(x, coo_adj_T, mask)  # gnn_layer_num * (batch, gnns_hidden[-1])
         DGh.insert(0, x[mask])  # gnn_layer_num+1 * (batch, gnns_hidden[-1])
@@ -81,9 +81,7 @@ class LBGLATModel(nn.Module):
         h_2_2 = self.fc_path2(RDGh)  # (batch, n_classes): not softmax
         # Merge separate batches
         h_1 = torch.mul(mask_1.repeat(1, h_1.shape[1]), h_1)
-        h_2_1 = torch.mul(mask_2.repeat(1, h_2_1.shape[1]), h_2_1)  
-        h_2_2 = torch.mul(mask_3.repeat(1, h_2_2.shape[1]), h_2_2)  
+        h_2_1 = torch.mul(mask_2.repeat(1, h_2_1.shape[1]), h_2_1)
+        h_2_2 = torch.mul(mask_3.repeat(1, h_2_2.shape[1]), h_2_2)
         h = h_1 + h_2_1 + h_2_2  # (batch, n_classes): not softmax
         return h
-
-
