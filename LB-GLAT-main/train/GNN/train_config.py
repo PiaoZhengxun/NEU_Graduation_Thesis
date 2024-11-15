@@ -59,8 +59,8 @@ n_features = int(GNN_config.get("GNN", "n_features"))
 n_classes = int(GNN_config.get("GNN", "n_classes"))
 gnns_forward_hidden = torch.LongTensor(list(map(int, GNN_config.get("GNN", "gnns_forward_hidden").split())))
 gnn_forward_layer_num = int(GNN_config.get("GNN", "gnn_forward_layer_num"))
-gnns_reverse_hidden = torch.LongTensor(list(map(int, GNN_config.get("GNN", "gnns_reverse_hidden").split())))
-gnn_reverse_layer_num = int(GNN_config.get("GNN", "gnn_reverse_layer_num"))
+# gnns_reverse_hidden = torch.LongTensor(list(map(int, GNN_config.get("GNN", "gnns_reverse_hidden").split())))
+# gnn_reverse_layer_num = int(GNN_config.get("GNN", "gnn_reverse_layer_num"))
 linear_layer_num = int(GNN_config.get("GNN", "linear_layer_num"))
 linears_hidden = torch.LongTensor(list(map(int, GNN_config.get("GNN", "linears_hidden").split())))
 bias = GNN_config.get("GNN", "bias") == str(True)
@@ -123,12 +123,12 @@ def creat_LBGLAT():
     """
     return LBGLATModel(
         gnn_forward_layer_num=gnn_forward_layer_num,
-        gnn_reverse_layer_num=gnn_reverse_layer_num,
+        # gnn_reverse_layer_num=gnn_reverse_layer_num,
         linear_layer_num=linear_layer_num,
         n_features=n_features,
         n_classes=n_classes,
         gnns_forward_hidden=gnns_forward_hidden,
-        gnns_reverse_hidden=gnns_reverse_hidden,
+        # gnns_reverse_hidden=gnns_reverse_hidden,
         linears_hidden=linears_hidden,
         project_hidden=project_hidden,
         gnn_do_bn=gnn_do_bn,
@@ -171,29 +171,29 @@ def creat_GCNFC():
         bias=bias
     )
 
-
-def creat_BiGCNFC():
-    """
-    The model of GCN Folder:
-        2. Bi-graph + GCN + Fully Connection Layers
-    :return: model
-    """
-    return BiGCNFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        gnn_reverse_layer_num=gnn_reverse_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        gnns_reverse_hidden=gnns_reverse_hidden,
-        linears_hidden=linears_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        device=device,
-        bias=bias
-    )
+#
+# def creat_BiGCNFC():
+#     """
+#     The model of GCN Folder:
+#         2. Bi-graph + GCN + Fully Connection Layers
+#     :return: model
+#     """
+#     return BiGCNFCModel(
+#         gnn_forward_layer_num=gnn_forward_layer_num,
+#         gnn_reverse_layer_num=gnn_reverse_layer_num,
+#         linear_layer_num=linear_layer_num,
+#         n_features=n_features,
+#         n_classes=n_classes,
+#         gnns_forward_hidden=gnns_forward_hidden,
+#         gnns_reverse_hidden=gnns_reverse_hidden,
+#         linears_hidden=linears_hidden,
+#         gnn_do_bn=gnn_do_bn,
+#         linear_do_bn=linear_do_bn,
+#         gnn_dropout=gnn_dropout,
+#         linear_dropout=linear_dropout,
+#         device=device,
+#         bias=bias
+#     )
 
 
 def creat_GCNLTLAFC():
@@ -250,30 +250,30 @@ def creat_GATFC():
         bias=bias
     )
 
-
-def creat_BiGATFC():
-    """
-    The model of GAT Folder:
-        2. Bi-graph + GAT + Fully Connection Layers
-    :return: model
-    """
-    return BiGATFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        gnn_reverse_layer_num=gnn_reverse_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        gnns_reverse_hidden=gnns_reverse_hidden,
-        linears_hidden=linears_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        device=device,
-        bias=bias
-    )
-
+#
+# def creat_BiGATFC():
+#     """
+#     The model of GAT Folder:
+#         2. Bi-graph + GAT + Fully Connection Layers
+#     :return: model
+#     """
+#     return BiGATFCModel(
+#         gnn_forward_layer_num=gnn_forward_layer_num,
+#         gnn_reverse_layer_num=gnn_reverse_layer_num,
+#         linear_layer_num=linear_layer_num,
+#         n_features=n_features,
+#         n_classes=n_classes,
+#         gnns_forward_hidden=gnns_forward_hidden,
+#         gnns_reverse_hidden=gnns_reverse_hidden,
+#         linears_hidden=linears_hidden,
+#         gnn_do_bn=gnn_do_bn,
+#         linear_do_bn=linear_do_bn,
+#         gnn_dropout=gnn_dropout,
+#         linear_dropout=linear_dropout,
+#         device=device,
+#         bias=bias
+#     )
+#
 
 def creat_GATLTLAFC():
     """
@@ -305,38 +305,38 @@ def creat_GATLTLAFC():
         bias=bias
     )
 
-
-def creat_BiGATLTLAFC():
-    """
-    The model of GAT Folder:
-        4. Bi-graph + GAT + Long-term Layer Attention + Fully Connection Layers
-    :return: model
-    """
-    return BiGATLTLAFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        gnn_reverse_layer_num=gnn_reverse_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        gnns_reverse_hidden=gnns_reverse_hidden,
-        linears_hidden=linears_hidden,
-        project_hidden=project_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        tsf_dim=tsf_dim,
-        tsf_mlp_hidden=tsf_mlp_hidden,
-        tsf_depth=tsf_depth,
-        tsf_heads=tsf_heads,
-        tsf_head_dim=tsf_head_dim,
-        tsf_dropout=tsf_dropout,
-        vit_emb_dropout=vit_emb_dropout,
-        vit_pool=vit_pool,
-        device=device,
-        bias=bias
-    )
+#
+# def creat_BiGATLTLAFC():
+#     """
+#     The model of GAT Folder:
+#         4. Bi-graph + GAT + Long-term Layer Attention + Fully Connection Layers
+#     :return: model
+#     """
+#     return BiGATLTLAFCModel(
+#         gnn_forward_layer_num=gnn_forward_layer_num,
+#         gnn_reverse_layer_num=gnn_reverse_layer_num,
+#         linear_layer_num=linear_layer_num,
+#         n_features=n_features,
+#         n_classes=n_classes,
+#         gnns_forward_hidden=gnns_forward_hidden,
+#         gnns_reverse_hidden=gnns_reverse_hidden,
+#         linears_hidden=linears_hidden,
+#         project_hidden=project_hidden,
+#         gnn_do_bn=gnn_do_bn,
+#         linear_do_bn=linear_do_bn,
+#         gnn_dropout=gnn_dropout,
+#         linear_dropout=linear_dropout,
+#         tsf_dim=tsf_dim,
+#         tsf_mlp_hidden=tsf_mlp_hidden,
+#         tsf_depth=tsf_depth,
+#         tsf_heads=tsf_heads,
+#         tsf_head_dim=tsf_head_dim,
+#         tsf_dropout=tsf_dropout,
+#         vit_emb_dropout=vit_emb_dropout,
+#         vit_pool=vit_pool,
+#         device=device,
+#         bias=bias
+#     )
 
 
 #######################################
@@ -362,30 +362,30 @@ def creat_SAGEFC():
         bias=bias
     )
 
-
-def creat_BiSAGEFC():
-    """
-    The model of GraphSAGE Folder:
-        2. Bi-graph + GraphSAGE + Fully Connection Layers
-    :return: model
-    """
-    return BiSAGEFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        gnn_reverse_layer_num=gnn_reverse_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        gnns_reverse_hidden=gnns_reverse_hidden,
-        linears_hidden=linears_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        device=device,
-        bias=bias
-    )
-
+#
+# def creat_BiSAGEFC():
+#     """
+#     The model of GraphSAGE Folder:
+#         2. Bi-graph + GraphSAGE + Fully Connection Layers
+#     :return: model
+#     """
+#     return BiSAGEFCModel(
+#         gnn_forward_layer_num=gnn_forward_layer_num,
+#         gnn_reverse_layer_num=gnn_reverse_layer_num,
+#         linear_layer_num=linear_layer_num,
+#         n_features=n_features,
+#         n_classes=n_classes,
+#         gnns_forward_hidden=gnns_forward_hidden,
+#         gnns_reverse_hidden=gnns_reverse_hidden,
+#         linears_hidden=linears_hidden,
+#         gnn_do_bn=gnn_do_bn,
+#         linear_do_bn=linear_do_bn,
+#         gnn_dropout=gnn_dropout,
+#         linear_dropout=linear_dropout,
+#         device=device,
+#         bias=bias
+#     )
+#
 
 def creat_SAGELTLAFC():
     """
@@ -417,63 +417,63 @@ def creat_SAGELTLAFC():
         bias=bias
     )
 
-
-def creat_BiSAGELTLAFC():
-    """
-    The model of GraphSAGE Folder:
-        4. Bi-graph + GraphSAGE + Long-term Layer Attention + Fully Connection Layers
-    :return: model
-    """
-    return BiSAGELTLAFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        gnn_reverse_layer_num=gnn_reverse_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        gnns_reverse_hidden=gnns_reverse_hidden,
-        linears_hidden=linears_hidden,
-        project_hidden=project_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        tsf_dim=tsf_dim,
-        tsf_mlp_hidden=tsf_mlp_hidden,
-        tsf_depth=tsf_depth,
-        tsf_heads=tsf_heads,
-        tsf_head_dim=tsf_head_dim,
-        tsf_dropout=tsf_dropout,
-        vit_emb_dropout=vit_emb_dropout,
-        vit_pool=vit_pool,
-        device=device,
-        bias=bias
-    )
+#
+# def creat_BiSAGELTLAFC():
+#     """
+#     The model of GraphSAGE Folder:
+#         4. Bi-graph + GraphSAGE + Long-term Layer Attention + Fully Connection Layers
+#     :return: model
+#     """
+#     return BiSAGELTLAFCModel(
+#         gnn_forward_layer_num=gnn_forward_layer_num,
+#         gnn_reverse_layer_num=gnn_reverse_layer_num,
+#         linear_layer_num=linear_layer_num,
+#         n_features=n_features,
+#         n_classes=n_classes,
+#         gnns_forward_hidden=gnns_forward_hidden,
+#         gnns_reverse_hidden=gnns_reverse_hidden,
+#         linears_hidden=linears_hidden,
+#         project_hidden=project_hidden,
+#         gnn_do_bn=gnn_do_bn,
+#         linear_do_bn=linear_do_bn,
+#         gnn_dropout=gnn_dropout,
+#         linear_dropout=linear_dropout,
+#         tsf_dim=tsf_dim,
+#         tsf_mlp_hidden=tsf_mlp_hidden,
+#         tsf_depth=tsf_depth,
+#         tsf_heads=tsf_heads,
+#         tsf_head_dim=tsf_head_dim,
+#         tsf_dropout=tsf_dropout,
+#         vit_emb_dropout=vit_emb_dropout,
+#         vit_pool=vit_pool,
+#         device=device,
+#         bias=bias
+#     )
 
 
 #######################################
-# DeeperGCN
-def creat_BiGENFCModel():
-    """
-    The model of DeeperGCN Folder:
-        4. Bi-graph + DeeperGCN + Long-term Layer Attention + Fully Connection Layers
-    :return: model
-    """
-    return BiGENFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        gnn_reverse_layer_num=gnn_reverse_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        gnns_reverse_hidden=gnns_reverse_hidden,
-        linears_hidden=linears_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        device=device,
-        bias=bias
-    )
+# # DeeperGCN
+# def creat_BiGENFCModel():
+#     """
+#     The model of DeeperGCN Folder:
+#         4. Bi-graph + DeeperGCN + Long-term Layer Attention + Fully Connection Layers
+#     :return: model
+#     """
+#     return BiGENFCModel(
+#         gnn_forward_layer_num=gnn_forward_layer_num,
+#         gnn_reverse_layer_num=gnn_reverse_layer_num,
+#         linear_layer_num=linear_layer_num,
+#         n_features=n_features,
+#         n_classes=n_classes,
+#         gnns_forward_hidden=gnns_forward_hidden,
+#         gnns_reverse_hidden=gnns_reverse_hidden,
+#         linears_hidden=linears_hidden,
+#         gnn_do_bn=gnn_do_bn,
+#         linear_do_bn=linear_do_bn,
+#         gnn_dropout=gnn_dropout,
+#         linear_dropout=linear_dropout,
+#         device=device,
+#         bias=bias
+#     )
 
 
