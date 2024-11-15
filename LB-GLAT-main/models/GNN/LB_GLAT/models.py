@@ -1,23 +1,17 @@
 # -*- coding: utf-8 -*-
 
 
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import scipy.sparse as sp
-from torch import Tensor
+from models.GNN.GCN.models import GCNsBlock
 from models.GNN.LB_GLAT.layers import *
 from models.GNN.common import *
-from models.GNN.GCN.models import GCNsBlock
 
 
 class LBGLATModel(nn.Module):
     def __init__(self, gnn_forward_layer_num, gnn_reverse_layer_num, linear_layer_num, n_features, n_classes,
-                 gnns_forward_hidden: Tensor, gnns_reverse_hidden: Tensor,
-                 linears_hidden: Tensor, project_hidden, gnn_do_bn, linear_do_bn,
-                 gnn_dropout, linear_dropout, tsf_dim, tsf_mlp_hidden, tsf_depth, tsf_heads, tsf_head_dim, tsf_dropout,
-                 vit_emb_dropout, vit_pool, device, bias=True):
+                gnns_forward_hidden: Tensor, gnns_reverse_hidden: Tensor,
+                linears_hidden: Tensor, project_hidden, gnn_do_bn, linear_do_bn,
+                gnn_dropout, linear_dropout, tsf_dim, tsf_mlp_hidden, tsf_depth, tsf_heads, tsf_head_dim, tsf_dropout,
+                vit_emb_dropout, vit_pool, device, bias=True):
         super(LBGLATModel, self).__init__()
         self.device = device
         # Long-Term Layer Attention Network
@@ -58,9 +52,15 @@ class LBGLATModel(nn.Module):
         mask_2 = mask_2.to(self.device)[mask]
         mask_3 = mask_3.to(self.device)[mask]
 
-        coo_adj = sparse_mx_to_torch_sparse_tensor(coo_adj).to(self.device)
-        coo_adj_T = sparse_mx_to_torch_sparse_tensor(coo_adj_T).to(self.device)
+        if self.device.type == 'mps':
+            coo_adj = sparse_mx_to_torch_sparse_tensor(coo_adj).to_dense().to(self.device)
+        else:
+            coo_adj = sparse_mx_to_torch_sparse_tensor(coo_adj).to(self.device)
 
+        if self.device.type == 'mps':
+            coo_adj_T = sparse_mx_to_torch_sparse_tensor(coo_adj_T).to_dense().to(self.device)
+        else:
+            coo_adj_T = sparse_mx_to_torch_sparse_tensor(coo_adj_T).to(self.device)
         # GCN
         DGh = self.DGcn(x, coo_adj, mask)  # gnn_layer_num * (batch, gnns_hidden[-1])
         RDGh = self.RDGcn(x, coo_adj_T, mask)  # gnn_layer_num * (batch, gnns_hidden[-1])

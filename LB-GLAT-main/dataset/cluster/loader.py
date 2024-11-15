@@ -34,12 +34,23 @@ def get_dataset_list(seed):
         data_list.append(get_data(class_list[i], edge_list[i], node_list[i]))
     return data_list
 
+#see transpose loading bar
+def show_loading_bar(percentage):
+    bar_length = 50
+    filled_length = int(bar_length * percentage // 100)
+    bar = '█' * filled_length + '-' * (bar_length - filled_length)
+    print(f"\r|{bar}| {percentage:.2f}% Complete", end="\r")
+
 
 def get_data(classes, edges, nodes):
     classes, edges, nodes = create_index(classes, edges, nodes)  # create index
 
     ###########################################################
-    print("dataset.cluster.loader.py >> get_data function undirected format 11111****")
+    print("\n")
+    print("****************************************************************")
+    print("dataset.cluster.loader.py >> get_data function undirected format")
+    print("****************************************************************")
+
     ##ValueError XXXX
     # reverse_edges = edges[[1,0], :]
     # edges = np.concatenate((edges, reverse_edges), axis =1 )
@@ -59,12 +70,32 @@ def get_data(classes, edges, nodes):
     # edges = np.concatenate((edges, reverse_edges), axis=0)
 
     #use TRANSPOSE
+    # print("original edge shape:", edges.shape)
+    # edges = edges.T
+    # reverse_edges = edges[[1, 0], :]
+    # print("reversed edges shape:", reverse_edges.shape)
+    # edges = np.concatenate((edges, reverse_edges), axis=1)
+    # ###########################################################
+
+    ## transpose add tqdm loading bar
     print("original edge shape:", edges.shape)
+    print("Transposing edges...")
+    for i in range(101):
+        show_loading_bar(i)
     edges = edges.T
-    reverse_edges = edges[[1, 0], :]
-    print("reversed edges shape:", reverse_edges.shape)
+    print("\nEdges transposed. Shape:", edges.shape)
+    print("Creating reversed edges...")
+    reverse_edges = np.array([edges[1], edges[0]])
+    for i in range(101):
+        show_loading_bar(i)
+    print("\nReversed edges shape:", reverse_edges.shape)
+    print("Concatenating edges...")
     edges = np.concatenate((edges, reverse_edges), axis=1)
+    for i in range(101):
+        show_loading_bar(i)
+    print("\nConcatenation complete. Final edges shape:", edges.shape)
     ###########################################################
+
     classes = classes[:, 1]
     nodes = nodes[:, 2:]
     class_tensor, edge_tensor, node_tensor = to_tensor(classes, edges, nodes)
