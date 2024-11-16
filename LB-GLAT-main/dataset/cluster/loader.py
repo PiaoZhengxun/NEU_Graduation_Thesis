@@ -174,7 +174,7 @@ def create_index(classes, edges, nodes):
     idx = np.array(nodes[:, 0], dtype=np.int32)
     idx_map = {j: i for i, j in enumerate(idx)}
     edges = np.array(list(map(idx_map.get, edges.flatten())),
-                     dtype=np.int32).reshape(edges.shape)
+                    dtype=np.int32).reshape(edges.shape)
     classes[:, 0] = np.array(list(map(idx_map.get, classes[:, 0])), dtype=np.int32)
     return classes[np.argsort(classes[:, 0])], edges, nodes
 
