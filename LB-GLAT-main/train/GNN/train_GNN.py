@@ -44,39 +44,39 @@ if model_name in ["LB_GLAT"]:
 elif model_name in ["GCN_FC"]:  # GCN
     model = creat_GCNFC()
     print(f"Selected model_name: {model_name}")
-elif model_name in ["Bi_GCN_FC"]:
-    model = creat_BiGCNFC()
-    print(f"Selected model_name: {model_name}")
+# elif model_name in ["Bi_GCN_FC"]:
+#     model = creat_BiGCNFC()
+#     print(f"Selected model_name: {model_name}")
 elif model_name in ["GCN_LTLA_FC"]:
     model = creat_GCNLTLAFC()
     print(f"Selected model_name: {model_name}")
 elif model_name in ["GAT_FC",]:  # GAT
     model = creat_GATFC()
     print(f"Selected model_name: {model_name}")
-elif model_name in ["Bi_GAT_FC"]:
-    model = creat_BiGATFC()
-    print(f"Selected model_name: {model_name}")
+# elif model_name in ["Bi_GAT_FC"]:
+#     model = creat_BiGATFC()
+#     print(f"Selected model_name: {model_name}")
 elif model_name in ["GAT_LTLA_FC"]:
     model = creat_GATLTLAFC()
     print(f"Selected model_name: {model_name}")
-elif model_name in ["Bi_GAT_LTLA_FC"]:
-    model = creat_BiGATLTLAFC()
-    print(f"Selected model_name: {model_name}")
+# elif model_name in ["Bi_GAT_LTLA_FC"]:
+#     model = creat_BiGATLTLAFC()
+#     print(f"Selected model_name: {model_name}")
 elif model_name in ["SAGE_FC"]:  # GraphSAGE
     model = creat_SAGEFC()
     print(f"Selected model_name: {model_name}")
-elif model_name in ["Bi_SAGE_FC"]:
-    model = creat_BiSAGEFC()
-    print(f"Selected model_name: {model_name}")
+# elif model_name in ["Bi_SAGE_FC"]:
+#     model = creat_BiSAGEFC()
+#     print(f"Selected model_name: {model_name}")
 elif model_name in ["SAGE_LTLA_FC"]:
     model = creat_SAGELTLAFC()
     print(f"Selected model_name: {model_name}")
-elif model_name in ["Bi_SAGE_LTLA_FC"]:
-    model = creat_BiSAGELTLAFC()
-    print(f"Selected model_name: {model_name}")
-elif model_name in ["Bi_GEN_FC"]:  # DeeperGCN
-    model = creat_BiGENFCModel()
-    print(f"Selected model_name: {model_name}")
+# elif model_name in ["Bi_SAGE_LTLA_FC"]:
+#     model = creat_BiSAGELTLAFC()
+#     print(f"Selected model_name: {model_name}")
+# elif model_name in ["Bi_GEN_FC"]:  # DeeperGCN
+#     model = creat_BiGENFCModel()
+#     print(f"Selected model_name: {model_name}")
 else:
     raise NoModelError("No model is specified during training.")
 paras_num = get_paras_num(model, model_name)
