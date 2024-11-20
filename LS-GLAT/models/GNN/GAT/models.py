@@ -43,15 +43,15 @@ class GATBlock(nn.Module):
 
 class GATFCModel(nn.Module):
     def __init__(self, gnn_forward_layer_num, linear_layer_num, n_features, n_classes,
-                 gnns_forward_hidden: Tensor, linears_hidden: Tensor, gnn_do_bn, linear_do_bn,
-                 gnn_dropout, linear_dropout, device, bias=True):
+                    gnns_forward_hidden: Tensor, linears_hidden: Tensor, gnn_do_bn, linear_do_bn,
+                    gnn_dropout, linear_dropout, device, bias=True):
         super(GATFCModel, self).__init__()
         self.device = device
         self.DGat = GATsBlock(layer_num=gnn_forward_layer_num, n_features=n_features, gnns_hidden=gnns_forward_hidden,
-                              do_bn=gnn_do_bn, dropout=gnn_dropout, bias=bias)
+                                do_bn=gnn_do_bn, dropout=gnn_dropout, bias=bias)
         self.fc = FCsBlock(layer_num=linear_layer_num, n_features=int(gnns_forward_hidden[-1].item()),
-                           linears_hidden=linears_hidden, n_classes=n_classes,
-                           do_bn=linear_do_bn, dropout=linear_dropout, bias=bias)
+                            linears_hidden=linears_hidden, n_classes=n_classes,
+                            do_bn=linear_do_bn, dropout=linear_dropout, bias=bias)
 
     def forward(self, x, edge_index, mask):
         h = self.DGat(x, edge_index, mask)
@@ -60,22 +60,22 @@ class GATFCModel(nn.Module):
 
 class GATLTLAFCModel(nn.Module):
     def __init__(self, gnn_forward_layer_num, linear_layer_num, n_features, n_classes,
-                 gnns_forward_hidden: Tensor, linears_hidden: Tensor, project_hidden, gnn_do_bn, linear_do_bn,
-                 gnn_dropout, linear_dropout, tsf_dim, tsf_mlp_hidden, tsf_depth, tsf_heads, tsf_head_dim, tsf_dropout,
-                 vit_emb_dropout, vit_pool, device, bias=True):
+                    gnns_forward_hidden: Tensor, linears_hidden: Tensor, project_hidden, gnn_do_bn, linear_do_bn,
+                    gnn_dropout, linear_dropout, tsf_dim, tsf_mlp_hidden, tsf_depth, tsf_heads, tsf_head_dim, tsf_dropout,
+                    gt_emb_dropout, gt_pool, device, bias=True):
         super(GATLTLAFCModel, self).__init__()
         self.device = device
         self.DGat = GATsBlock(layer_num=gnn_forward_layer_num, n_features=n_features, gnns_hidden=gnns_forward_hidden,
-                              do_bn=gnn_do_bn, dropout=gnn_dropout, bias=bias)
+                                do_bn=gnn_do_bn, dropout=gnn_dropout, bias=bias)
         self.patches_forward_dim = [n_features] + gnns_forward_hidden.tolist()
         self.DGltla = LongTermLayerAttention(num_patches=gnn_forward_layer_num + 1, patches_dim=self.patches_forward_dim,
-                                             project_hidden=project_hidden, tsf_dim=tsf_dim,
-                                             tsf_mlp_hidden=tsf_mlp_hidden, depth=tsf_depth,
-                                             heads=tsf_heads, head_dim=tsf_head_dim, tsf_dropout=tsf_dropout,
-                                             vit_emb_dropout=vit_emb_dropout, pool=vit_pool, bias=bias)
+                                                project_hidden=project_hidden, tsf_dim=tsf_dim,
+                                                tsf_mlp_hidden=tsf_mlp_hidden, depth=tsf_depth,
+                                                heads=tsf_heads, head_dim=tsf_head_dim, tsf_dropout=tsf_dropout,
+                                                gt_emb_dropout=gt_emb_dropout, gt_pool=gt_pool, bias=bias)
         self.fc = FCsBlock(layer_num=linear_layer_num, n_features=tsf_dim,
-                           linears_hidden=linears_hidden, n_classes=n_classes,
-                           do_bn=linear_do_bn, dropout=linear_dropout, bias=bias)
+                            linears_hidden=linears_hidden, n_classes=n_classes,
+                            do_bn=linear_do_bn, dropout=linear_dropout, bias=bias)
 
     def forward(self, x, edge_index, mask):
         h = self.DGat(x, edge_index, mask)

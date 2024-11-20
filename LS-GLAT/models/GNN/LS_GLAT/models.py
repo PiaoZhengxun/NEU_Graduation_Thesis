@@ -26,8 +26,8 @@ class LSGLATModel(nn.Module):
             heads=tsf_heads,
             head_dim=tsf_head_dim,
             tsf_dropout=tsf_dropout,
-            emb_dropout=gt_emb_dropout,
-            pool=gt_pool,
+            gt_emb_dropout=gt_emb_dropout,
+            gt_pool=gt_pool,
             bias=bias
         )
         self.fc_path2 = FCsBlock(layer_num=linear_layer_num, n_features=tsf_dim,

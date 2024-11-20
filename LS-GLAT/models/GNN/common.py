@@ -9,13 +9,21 @@ import torch.nn.functional as F
 import scipy.sparse as sp
 from torch import Tensor, LongTensor
 
+# def sparse_mx_to_torch_sparse_tensor(sparse_mx):
+#     sparse_mx = sparse_mx.tocoo().astype(np.float32)
+#     indices = torch.from_numpy(
+#         np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64))
+#     values = torch.from_numpy(sparse_mx.data)
+#     shape = torch.Size(sparse_mx.shape)
+#     return torch.sparse.FloatTensor(indices, values, shape)
+
 def sparse_mx_to_torch_sparse_tensor(sparse_mx):
     sparse_mx = sparse_mx.tocoo().astype(np.float32)
     indices = torch.from_numpy(
         np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64))
     values = torch.from_numpy(sparse_mx.data)
     shape = torch.Size(sparse_mx.shape)
-    return torch.sparse.FloatTensor(indices, values, shape)
+    return torch.sparse_coo_tensor(indices, values, shape)
 
 def edgeIndex2CooAdj(adj_dim, edge_index: LongTensor):
     edge_index = edge_index.cpu().numpy()

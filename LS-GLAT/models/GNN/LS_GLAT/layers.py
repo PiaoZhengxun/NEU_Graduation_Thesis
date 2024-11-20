@@ -39,12 +39,12 @@ class ProjectLayer(nn.Module):
 
 class LongTermLayerAttention(nn.Module): #노드 장기적 관계 학습 계층
     def __init__(self, num_nodes, node_dim, project_hidden, tsf_dim, tsf_mlp_hidden, depth,
-                    heads, head_dim=64, tsf_dropout=0., emb_dropout=0., pool='mean', bias=True):
+                    heads, head_dim=64, tsf_dropout=0., gt_emb_dropout=0., gt_pool='mean', bias=True):
         super(LongTermLayerAttention, self).__init__()
         print("GraphTransformer - LTLA Calling")
         self.projection_layer = ProjectLayer(num_nodes, node_dim, project_hidden, bias=bias)
         self.attention_module = GraphTransformer(num_nodes, project_hidden, tsf_dim, tsf_mlp_hidden, depth, heads,
-                                                    head_dim=head_dim, tsf_dropout=tsf_dropout, emb_dropout=emb_dropout, pool=pool)
+                                                    head_dim=head_dim, tsf_dropout=tsf_dropout, gt_emb_dropout=gt_emb_dropout, gt_pool=gt_pool)
 
     def forward(self, h, edge_index):
         # h --> input feature tensor
@@ -55,19 +55,19 @@ class LongTermLayerAttention(nn.Module): #노드 장기적 관계 학습 계층
 
 class GraphTransformer(nn.Module): #node relationship 학습 --> transformer module
     def __init__(self, num_nodes, node_dim, tsf_dim, tsf_mlp_hidden, depth, heads,
-                    head_dim=64, tsf_dropout=0., emb_dropout=0., pool='mean'):
+                    head_dim=64, tsf_dropout=0., gt_emb_dropout=0., gt_pool='mean'):
         super().__init__()
         print("GraphTransformer - GraphTransformer Module Calling")
-        assert pool in {'mean', 'sum', 'max'} # checking  pooling function
+        assert gt_pool in {'mean', 'sum', 'max'} # checking  pooling function
         self.embedding_layer = nn.Linear(node_dim, tsf_dim) if node_dim != tsf_dim else nn.Identity()
         self.num_nodes = num_nodes
         self.position_embedding = nn.Parameter(torch.randn(1, num_nodes, tsf_dim))
-        self.dropout_layer = nn.Dropout(emb_dropout)
+        self.dropout_layer = nn.Dropout(gt_emb_dropout)
         self.transformer_blocks = nn.ModuleList([
             TransformerBlock(tsf_dim, heads, head_dim, tsf_mlp_hidden, tsf_dropout)
             for _ in range(depth)
         ])
-        self.pooling_mode = pool
+        self.pooling_mode = gt_pool
         self.norm_layer = nn.LayerNorm(tsf_dim)
 
     def forward(self, x, edge_index):
