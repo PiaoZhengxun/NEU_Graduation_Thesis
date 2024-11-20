@@ -14,53 +14,36 @@ import torch.backends.cudnn as cudnn
 
 from models.GNN.DeeperGCN.models import SingleGraphSAGEModel
 from models.GNN.GAT.models import *
-from models.GNN.GraphSAGE.models import *
-from models.GNN.LB_GLAT.models import *
-from models.GNN.GCN.models import *
+from models.GNN.LS_GLAT.models import *
 from utils.config_utils import *
 
-# get config
 GNN_config = get_config("GNN")
 dataset_config = get_config("dataset")
-# Training settings
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--no-cuda', action='store_true', default=GNN_config.get("GNN", "no_cuda") == str(True),
-                    help='Disables CUDA training.')
-parser.add_argument('--fastmode', action='store_true', default=GNN_config.get("GNN", "fastmode") == str(True),
-                    help='Validate during training pass.')
-parser.add_argument('--seed', type=int, default=int(GNN_config.get("GNN", "seed")), help='Random seed.')
-parser.add_argument('--epochs', type=int, default=int(GNN_config.get("GNN", "epochs")),
-                    help='Number of epochs to train.')
-parser.add_argument('--lr', type=float, default=float(GNN_config.get("GNN", "lr0")),
-                    help='Initial learning rate.')
-parser.add_argument('--weight_decay', type=float, default=float(GNN_config.get("GNN", "weight_decay")),
-                    help='Weight decay (L2 loss on parameters).')
-# parser.add_argument('--dropout', type=float, default=float(GNN_config.get("GNN", "dropout")),
-#                     help='Dropout rate (1 - keep probability).')
+parser.add_argument('--no-cuda', action='store_true', default=GNN_config.get("GNN", "no_cuda") == str(True))
+parser.add_argument('--fastmode', action='store_true', default=GNN_config.get("GNN", "fastmode") == str(True))
+parser.add_argument('--seed', type=int, default=int(GNN_config.get("GNN", "seed")))
+parser.add_argument('--epochs', type=int, default=int(GNN_config.get("GNN", "epochs")))
+parser.add_argument('--lr', type=float, default=float(GNN_config.get("GNN", "lr0")))
+parser.add_argument('--weight_decay', type=float, default=float(GNN_config.get("GNN", "weight_decay")))
 
 args = parser.parse_args()
 
-# config settings
-# dataset config setting
 time_num = int(dataset_config.get("Elliptic", "time_num"))
 time_end = int(dataset_config.get("Elliptic", "time_end"))
-# train_end_time = int(dataset_config.get("Elliptic", "train_end_time"))
 criterion_weight = np.array(list(map(float, dataset_config.get("Elliptic", "criterion_weight").split())))
 train_val_test_ratio = np.array(list(map(float, dataset_config.get("Elliptic", "train_val_test_ratio").split())))
 down_sampling = dataset_config.get("Elliptic", "down_sampling") == str(True)
 rs_NP_ratio = float(dataset_config.get("Elliptic", "rs_NP_ratio"))
-# GNN config settings
 no_cuda = args.no_cuda
 ctd = GNN_config.get("GNN", "ctd")
 fastmode = args.fastmode
-# fastmode = False
 seed = args.seed
 n_features = int(GNN_config.get("GNN", "n_features"))
 n_classes = int(GNN_config.get("GNN", "n_classes"))
 gnns_forward_hidden = torch.LongTensor(list(map(int, GNN_config.get("GNN", "gnns_forward_hidden").split())))
 gnn_forward_layer_num = int(GNN_config.get("GNN", "gnn_forward_layer_num"))
-# gnns_reverse_hidden = torch.LongTensor(list(map(int, GNN_config.get("GNN", "gnns_reverse_hidden").split())))
-# gnn_reverse_layer_num = int(GNN_config.get("GNN", "gnn_reverse_layer_num"))
 linear_layer_num = int(GNN_config.get("GNN", "linear_layer_num"))
 linears_hidden = torch.LongTensor(list(map(int, GNN_config.get("GNN", "linears_hidden").split())))
 bias = GNN_config.get("GNN", "bias") == str(True)
@@ -78,7 +61,6 @@ start_epoch = int(GNN_config.get("GNN", "start_epoch"))
 epochs = args.epochs
 model_name = GNN_config.get("GNN", "model_name")
 model_folder = GNN_config.get("GNN", "model_folder")
-# LB_GLAT config setting
 project_hidden = int(GNN_config.get("LTLA", "project_hidden"))
 tsf_dim = int(GNN_config.get("LTLA", "tsf_dim"))
 tsf_mlp_hidden = int(GNN_config.get("LTLA", "tsf_mlp_hidden"))
@@ -86,123 +68,18 @@ tsf_depth = int(GNN_config.get("LTLA", "tsf_depth"))
 tsf_heads = int(GNN_config.get("LTLA", "tsf_heads"))
 tsf_head_dim = int(GNN_config.get("LTLA", "tsf_head_dim"))
 tsf_dropout = float(GNN_config.get("LTLA", "tsf_dropout"))
-vit_emb_dropout = float(GNN_config.get("LTLA", "vit_emb_dropout"))
-vit_pool = GNN_config.get("LTLA", "vit_pool")
+gt_emb_dropout = float(GNN_config.get("LTLA", "gt_emb_dropout"))
+gt_pool = GNN_config.get("LTLA", "gt_pool")
 
 result_path = "../../result/GNN"
-
-# Set CUDA visible devices if applicable
 os.environ["CUDA_VISIBLE_DEVICES"] = ctd
 
-# Check for device availability
-# if torch.backends.mps.is_available():
-#     device = torch.device("mps")
-#     print(f"MPS Available, using device: {device}")
-# elif torch.cuda.is_available():
-#     use_cuda = not no_cuda
-#     device = torch.device('cuda' if use_cuda else 'cpu')
-#     print(f"Cuda Available: {use_cuda}, using device: {device}")
-# else:
-#     device = torch.device("cpu")
-#     print(f"No MPS or CUDA available, using device: {device}")
-
-# cuda
 use_cuda = not no_cuda and torch.cuda.is_available()
 device = torch.device('cuda' if use_cuda else 'cpu')
 print("Cuda Available:{}, use {}!".format(use_cuda, device))
 
-
-# use_mps = torch.backends.mps.is_available()
-######################################
-# LB_GLAT
-def creat_LBGLAT():
-    """
-# Initialize model function
-    The model of LB_GLAT Folder
-    :return: model
-    """
-    return LBGLATModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        # gnn_reverse_layer_num=gnn_reverse_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        # gnns_reverse_hidden=gnns_reverse_hidden,
-        linears_hidden=linears_hidden,
-        project_hidden=project_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        tsf_dim=tsf_dim,
-        tsf_mlp_hidden=tsf_mlp_hidden,
-        tsf_depth=tsf_depth,
-        tsf_heads=tsf_heads,
-        tsf_head_dim=tsf_head_dim,
-        tsf_dropout=tsf_dropout,
-        vit_emb_dropout=vit_emb_dropout,
-        vit_pool=vit_pool,
-        device=device,
-        bias=bias
-    )
-
-
-#######################################
-# GCN
-def creat_GCNFC():
-    """
-    The model of GCN Folder:
-        1. GCN + Fully Connection Layers
-    :return: model
-    """
-    return GCNFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        linears_hidden=linears_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        device=device,
-        bias=bias
-    )
-
-#
-# def creat_BiGCNFC():
-#     """
-#     The model of GCN Folder:
-#         2. Bi-graph + GCN + Fully Connection Layers
-#     :return: model
-#     """
-#     return BiGCNFCModel(
-#         gnn_forward_layer_num=gnn_forward_layer_num,
-#         gnn_reverse_layer_num=gnn_reverse_layer_num,
-#         linear_layer_num=linear_layer_num,
-#         n_features=n_features,
-#         n_classes=n_classes,
-#         gnns_forward_hidden=gnns_forward_hidden,
-#         gnns_reverse_hidden=gnns_reverse_hidden,
-#         linears_hidden=linears_hidden,
-#         gnn_do_bn=gnn_do_bn,
-#         linear_do_bn=linear_do_bn,
-#         gnn_dropout=gnn_dropout,
-#         linear_dropout=linear_dropout,
-#         device=device,
-#         bias=bias
-#     )
-
-
-def creat_GCNLTLAFC():
-    """
-    The model of GCN Folder:
-        3. GCN + Long-term Layer Attention + Fully Connection Layers
-    :return: model
-    """
-    return GCNLTLAFCModel(
+def creat_LSGLAT():
+    return LSGLATModel(
         gnn_forward_layer_num=gnn_forward_layer_num,
         linear_layer_num=linear_layer_num,
         n_features=n_features,
@@ -220,281 +97,33 @@ def creat_GCNLTLAFC():
         tsf_heads=tsf_heads,
         tsf_head_dim=tsf_head_dim,
         tsf_dropout=tsf_dropout,
-        vit_emb_dropout=vit_emb_dropout,
-        vit_pool=vit_pool,
+        gt_emb_dropout=gt_emb_dropout,
+        gt_pool=gt_pool,
         device=device,
         bias=bias
     )
-
-
-#######################################
-# GAT
-def creat_GATFC():
-    """
-    The model of GAT Folder:
-        1. GAT + Fully Connection Layers
-    :return: model
-    """
-    return GATFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        linears_hidden=linears_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        device=device,
-        bias=bias
-    )
-
-#
-# def creat_BiGATFC():
-#     """
-#     The model of GAT Folder:
-#         2. Bi-graph + GAT + Fully Connection Layers
-#     :return: model
-#     """
-#     return BiGATFCModel(
-#         gnn_forward_layer_num=gnn_forward_layer_num,
-#         gnn_reverse_layer_num=gnn_reverse_layer_num,
-#         linear_layer_num=linear_layer_num,
-#         n_features=n_features,
-#         n_classes=n_classes,
-#         gnns_forward_hidden=gnns_forward_hidden,
-#         gnns_reverse_hidden=gnns_reverse_hidden,
-#         linears_hidden=linears_hidden,
-#         gnn_do_bn=gnn_do_bn,
-#         linear_do_bn=linear_do_bn,
-#         gnn_dropout=gnn_dropout,
-#         linear_dropout=linear_dropout,
-#         device=device,
-#         bias=bias
-#     )
-#
-
-def creat_GATLTLAFC():
-    """
-    The model of GAT Folder:
-        3. GAT + Long-term Layer Attention + Fully Connection Layers
-    :return: model
-    """
-    return GATLTLAFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        linears_hidden=linears_hidden,
-        project_hidden=project_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        tsf_dim=tsf_dim,
-        tsf_mlp_hidden=tsf_mlp_hidden,
-        tsf_depth=tsf_depth,
-        tsf_heads=tsf_heads,
-        tsf_head_dim=tsf_head_dim,
-        tsf_dropout=tsf_dropout,
-        vit_emb_dropout=vit_emb_dropout,
-        vit_pool=vit_pool,
-        device=device,
-        bias=bias
-    )
-
-#
-# def creat_BiGATLTLAFC():
-#     """
-#     The model of GAT Folder:
-#         4. Bi-graph + GAT + Long-term Layer Attention + Fully Connection Layers
-#     :return: model
-#     """
-#     return BiGATLTLAFCModel(
-#         gnn_forward_layer_num=gnn_forward_layer_num,
-#         gnn_reverse_layer_num=gnn_reverse_layer_num,
-#         linear_layer_num=linear_layer_num,
-#         n_features=n_features,
-#         n_classes=n_classes,
-#         gnns_forward_hidden=gnns_forward_hidden,
-#         gnns_reverse_hidden=gnns_reverse_hidden,
-#         linears_hidden=linears_hidden,
-#         project_hidden=project_hidden,
-#         gnn_do_bn=gnn_do_bn,
-#         linear_do_bn=linear_do_bn,
-#         gnn_dropout=gnn_dropout,
-#         linear_dropout=linear_dropout,
-#         tsf_dim=tsf_dim,
-#         tsf_mlp_hidden=tsf_mlp_hidden,
-#         tsf_depth=tsf_depth,
-#         tsf_heads=tsf_heads,
-#         tsf_head_dim=tsf_head_dim,
-#         tsf_dropout=tsf_dropout,
-#         vit_emb_dropout=vit_emb_dropout,
-#         vit_pool=vit_pool,
-#         device=device,
-#         bias=bias
-#     )
-
-
-#######################################
-# GraphSAGE
-def creat_SAGEFC():
-    """
-    The model of GraphSAGE Folder:
-        1. GraphSAGE + Fully Connection Layers
-    :return: model
-    """
-    return SAGEFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        linears_hidden=linears_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        device=device,
-        bias=bias
-    )
-
-#
-# def creat_BiSAGEFC():
-#     """
-#     The model of GraphSAGE Folder:
-#         2. Bi-graph + GraphSAGE + Fully Connection Layers
-#     :return: model
-#     """
-#     return BiSAGEFCModel(
-#         gnn_forward_layer_num=gnn_forward_layer_num,
-#         gnn_reverse_layer_num=gnn_reverse_layer_num,
-#         linear_layer_num=linear_layer_num,
-#         n_features=n_features,
-#         n_classes=n_classes,
-#         gnns_forward_hidden=gnns_forward_hidden,
-#         gnns_reverse_hidden=gnns_reverse_hidden,
-#         linears_hidden=linears_hidden,
-#         gnn_do_bn=gnn_do_bn,
-#         linear_do_bn=linear_do_bn,
-#         gnn_dropout=gnn_dropout,
-#         linear_dropout=linear_dropout,
-#         device=device,
-#         bias=bias
-#     )
-#
-
-def creat_SAGELTLAFC():
-    """
-    The model of GraphSAGE Folder:
-        3. GraphSAGE + Long-term Layer Attention + Fully Connection Layers
-    :return: model
-    """
-    return SAGELTLAFCModel(
-        gnn_forward_layer_num=gnn_forward_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_forward_hidden=gnns_forward_hidden,
-        linears_hidden=linears_hidden,
-        project_hidden=project_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        tsf_dim=tsf_dim,
-        tsf_mlp_hidden=tsf_mlp_hidden,
-        tsf_depth=tsf_depth,
-        tsf_heads=tsf_heads,
-        tsf_head_dim=tsf_head_dim,
-        tsf_dropout=tsf_dropout,
-        vit_emb_dropout=vit_emb_dropout,
-        vit_pool=vit_pool,
-        device=device,
-        bias=bias
-    )
-
-#
-# def creat_BiSAGELTLAFC():
-#     """
-#     The model of GraphSAGE Folder:
-#         4. Bi-graph + GraphSAGE + Long-term Layer Attention + Fully Connection Layers
-#     :return: model
-#     """
-#     return BiSAGELTLAFCModel(
-#         gnn_forward_layer_num=gnn_forward_layer_num,
-#         gnn_reverse_layer_num=gnn_reverse_layer_num,
-#         linear_layer_num=linear_layer_num,
-#         n_features=n_features,
-#         n_classes=n_classes,
-#         gnns_forward_hidden=gnns_forward_hidden,
-#         gnns_reverse_hidden=gnns_reverse_hidden,
-#         linears_hidden=linears_hidden,
-#         project_hidden=project_hidden,
-#         gnn_do_bn=gnn_do_bn,
-#         linear_do_bn=linear_do_bn,
-#         gnn_dropout=gnn_dropout,
-#         linear_dropout=linear_dropout,
-#         tsf_dim=tsf_dim,
-#         tsf_mlp_hidden=tsf_mlp_hidden,
-#         tsf_depth=tsf_depth,
-#         tsf_heads=tsf_heads,
-#         tsf_head_dim=tsf_head_dim,
-#         tsf_dropout=tsf_dropout,
-#         vit_emb_dropout=vit_emb_dropout,
-#         vit_pool=vit_pool,
-#         device=device,
-#         bias=bias
-#     )
-
-
-#######################################
-# # DeeperGCN
 
 def create_SingleGraphSAGEModel():
-    """
-    The model of GraphSAGE with Single Graph:
-        Single-graph + GraphSAGE + Fully Connection Layers
-    :return: model
-    """
     return SingleGraphSAGEModel(
-        gnn_layer_num=gnn_forward_layer_num,  # Number of layers for the GraphSAGE model
+        gnn_layer_num=gnn_forward_layer_num,
         linear_layer_num=linear_layer_num,
         n_features=n_features,
         n_classes=n_classes,
-        gnns_hidden=gnns_forward_hidden,  # Hidden layer sizes for GraphSAGE layers
-        linears_hidden=linears_hidden,  # Hidden layer sizes for fully connected layers
-        gnn_do_bn=gnn_do_bn,  # Apply batch normalization for GNN layers
-        linear_do_bn=linear_do_bn,  # Apply batch normalization for fully connected layers
-        gnn_dropout=gnn_dropout,  # Dropout for GNN layers
-        linear_dropout=linear_dropout,  # Dropout for fully connected layers
+        gnns_hidden=gnns_forward_hidden,
+        linears_hidden=linears_hidden,
+        gnn_do_bn=gnn_do_bn,
+        linear_do_bn=linear_do_bn,
+        gnn_dropout=gnn_dropout,
+        linear_dropout=linear_dropout,
         device=device,
-        bias=bias
+        bias=bias,
+        project_hidden=project_hidden,
+        tsf_dim=tsf_dim,
+        tsf_mlp_hidden=tsf_mlp_hidden,
+        tsf_depth=tsf_depth,
+        tsf_heads=tsf_heads,
+        tsf_head_dim=tsf_head_dim,
+        tsf_dropout=tsf_dropout,
+        gt_emb_dropout=gt_emb_dropout,
+        gt_pool=gt_pool
     )
-# def creat_BiGENFCModel():
-#     """
-#     The model of DeeperGCN Folder:
-#         4. Bi-graph + DeeperGCN + Long-term Layer Attention + Fully Connection Layers
-#     :return: model
-#     """
-#     return BiGENFCModel(
-#         gnn_forward_layer_num=gnn_forward_layer_num,
-#         gnn_reverse_layer_num=gnn_reverse_layer_num,
-#         linear_layer_num=linear_layer_num,
-#         n_features=n_features,
-#         n_classes=n_classes,
-#         gnns_forward_hidden=gnns_forward_hidden,
-#         gnns_reverse_hidden=gnns_reverse_hidden,
-#         linears_hidden=linears_hidden,
-#         gnn_do_bn=gnn_do_bn,
-#         linear_do_bn=linear_do_bn,
-#         gnn_dropout=gnn_dropout,
-#         linear_dropout=linear_dropout,
-#         device=device,
-#         bias=bias
-#     )
-
-
