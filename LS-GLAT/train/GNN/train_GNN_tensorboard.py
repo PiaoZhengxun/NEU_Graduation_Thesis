@@ -15,7 +15,7 @@ from utils.file_utils import get_absolute_path_by_path
 
 logs_subfolder = "time" + str(time_end) + "__" + "".join([str(i) for i in gnns_forward_hidden.numpy()]) + "__" + \
                     str(project_hidden) + "_" + str(tsf_dim) + "_" + str(tsf_depth) + "_" + str(tsf_heads) + "_" + \
-                    str(tsf_head_dim) + "_" + str(tsf_dropout) + str(emb_dropout) + vit_pool + "__" + \
+                    str(tsf_head_dim) + "_" + str(tsf_dropout) + str(gt_emb_dropout) + gt_pool + "__" + \
                     "".join([str(i) for i in linears_hidden.numpy()]) + "__2__dr" + str(decay_rate) + "__lr" + str(lr0)
 
 ###########################################
