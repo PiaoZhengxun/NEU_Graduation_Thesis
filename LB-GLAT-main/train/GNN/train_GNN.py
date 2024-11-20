@@ -32,6 +32,7 @@ setup_seed(seed)
 ###########################################
 # Load data
 data_list = get_dataset_list(seed)  # 使用train_mask val_mask test_mask
+# print("Shape of data.edge_index before passing to model:", data_list.edge_index.shape)
 
 ###########################################
 # Model and optimizer
@@ -74,9 +75,10 @@ elif model_name in ["SAGE_LTLA_FC"]:
 # elif model_name in ["Bi_SAGE_LTLA_FC"]:
 #     model = creat_BiSAGELTLAFC()
 #     print(f"Selected model_name: {model_name}")
-# elif model_name in ["Bi_GEN_FC"]:  # DeeperGCN
-#     model = creat_BiGENFCModel()
-#     print(f"Selected model_name: {model_name}")
+###########################################################################CHANGED
+elif model_name in ["SINGLE_GRAPH_SAGE"]:  # DeeperGCN
+    model = create_SingleGraphSAGEModel()
+    print(f"Selected model_name: {model_name}")
 else:
     raise NoModelError("No model is specified during training.")
 paras_num = get_paras_num(model, model_name)
@@ -106,11 +108,18 @@ criterion = nn.CrossEntropyLoss(weight=torch.FloatTensor(criterion_weight))
 
 model.to(device)
 criterion.to(device)
+#
+# for data in data_list:
+#     if data.edge_index.shape[0] != 2:
+#         print("Transposing edge_index to correct shape...")
+#         data.edge_index = data.edge_index.t()
+#     output_mask = model(x=data.x, edge_index=data.edge_index, mask=data.train_mask)
 
 
 ###########################################
 # Train
 def train_epoch(epoch):
+
     model.train()
     train_loss = 0
     train_target_num = torch.zeros((1, n_classes), device=device)
@@ -124,7 +133,18 @@ def train_epoch(epoch):
         data.to(device)
         optimizer.zero_grad()
         output_mask = model(x=data.x, edge_index=data.edge_index, mask=data.train_mask)
+        # filtered_x = data.x[data.train_mask]
+        # output_mask = model(x=filtered_x, edge_index=data.edge_index)
         y_mask = data.y[data.train_mask]
+        ##debugggggg to check wheter output_mask or y_mask is in coreect shape
+        # print(f"output_mask shape: {output_mask.shape}, y_mask shape: {y_mask.shape}")
+        # If necessary, reshape or handle dimension mismatch
+        if output_mask.shape[0] != y_mask.shape[0]:
+            print("Batch size mismatch detected. Investigating...")
+            output_mask = output_mask[data.train_mask]
+            ###
+
+
         loss = criterion(output_mask, y_mask)
         train_loss += loss.item()
         loss.backward()  # Derive gradients.
@@ -218,6 +238,7 @@ def test():
     test_target_all = []
     for data in tqdm(data_list, desc="Test Data: "):
         data.to(device)
+        # print(f"edge_index shape: {data.edge_index.shape}")  # This should be [2, num_edges]
         output_mask = model(x=data.x, edge_index=data.edge_index, mask=data.test_mask)
         y_mask = data.y[data.test_mask]
         test_loss += criterion(output_mask, y_mask).item()
