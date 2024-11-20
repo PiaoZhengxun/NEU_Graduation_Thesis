@@ -13,15 +13,9 @@ from train.GNN.train_config import *
 from error.NoModelError import NoModelError
 from utils.file_utils import get_absolute_path_by_path
 
-
-# logs_subfolder = "time" + str(time_end) + "__" + "".join([str(i) for i in gnns_forward_hidden.numpy()]) + "_" + \
-#                  "".join([str(i) for i in gnns_reverse_hidden.numpy()]) + "__" + \
-#                  str(project_hidden) + "_" + str(tsf_dim) + "_" + str(tsf_depth) + "_" + str(tsf_heads) + "_" + \
-#                  str(tsf_head_dim) + "_" + str(tsf_dropout) + str(vit_emb_dropout) + vit_pool + "__" + \
-#                  "".join([str(i) for i in linears_hidden.numpy()]) + "__2__dr" + str(decay_rate) + "__lr" + str(lr0)
 logs_subfolder = "time" + str(time_end) + "__" + "".join([str(i) for i in gnns_forward_hidden.numpy()]) + "__" + \
                     str(project_hidden) + "_" + str(tsf_dim) + "_" + str(tsf_depth) + "_" + str(tsf_heads) + "_" + \
-                    str(tsf_head_dim) + "_" + str(tsf_dropout) + str(vit_emb_dropout) + vit_pool + "__" + \
+                    str(tsf_head_dim) + "_" + str(tsf_dropout) + str(emb_dropout) + vit_pool + "__" + \
                     "".join([str(i) for i in linears_hidden.numpy()]) + "__2__dr" + str(decay_rate) + "__lr" + str(lr0)
 
 ###########################################
@@ -35,32 +29,10 @@ data_list = get_dataset_list(seed)  # train_mask val_mask test_mask
 ###########################################
 # Model and optimizer
 
-if model_name in ["LB_GLAT"]:
-    model = creat_LBGLAT()
-elif model_name in ["GCN_FC"]:  # GCN
-    model = creat_GCNFC()
-# elif model_name in ["Bi_GCN_FC"]:
-#     model = creat_BiGCNFC()
-elif model_name in ["GCN_LTLA_FC"]:
-    model = creat_GCNLTLAFC()
-elif model_name in ["GAT_FC",]:  # GAT
-    model = creat_GATFC()
-# elif model_name in ["Bi_GAT_FC"]:
-#     model = creat_BiGATFC()
-elif model_name in ["GAT_LTLA_FC"]:
-    model = creat_GATLTLAFC()
-# elif model_name in ["Bi_GAT_LTLA_FC"]:
-#     model = creat_BiGATLTLAFC()
-elif model_name in ["SAGE_FC"]:  # GraphSAGE
-    model = creat_SAGEFC()
-# elif model_name in ["Bi_SAGE_FC"]:
-#     model = creat_BiSAGEFC()
-elif model_name in ["SAGE_LTLA_FC"]:
-    model = creat_SAGELTLAFC()
-# elif model_name in ["Bi_SAGE_LTLA_FC"]:
-#     model = creat_BiSAGELTLAFC()
-# elif model_name in ["Bi_GEN_FC"]:  # DeeperGCN
-#     model = creat_BiGENFCModel()
+if model_name in ["LS_GLAT"]:
+    model = creat_LSGLAT()
+elif model_name in ["SINGLE_GRAPH_SAGE"]:  #
+    model = create_SingleGraphSAGEModel()
 else:
     raise NoModelError("No model is specified during training.")
 paras_num = get_paras_num(model, model_name)
@@ -288,18 +260,12 @@ def train(epochs):
     results_dir = f"{result_path}/{model_folder}/results/{logs_subfolder}"
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
-    # results.to_csv(
-    #     f'{results_dir}/{model_name}_paras{paras_num.get("Total")}_G{gnn_forward_layer_num}{gnn_reverse_layer_num}LA{1}L{linear_layer_num}O{1}_lr{lr0}dr{decay_rate}_bn{int(gnn_do_bn)}{int(linear_do_bn)}_gd{gnn_dropout}ld{linear_dropout}_{opt}_tw{criterion_weight[0]}_t{train_val_test_ratio[0]}{train_val_test_ratio[1]}rs{int(down_sampling)}{rs_NP_ratio}_epochs{epochs}_t{t_total:0.4f}.csv',
-    #     mode='w', header=True, index=False)
     results.to_csv(
         f'{results_dir}/{model_name}_paras{paras_num.get("Total")}_G{gnn_forward_layer_num}LA{1}L{linear_layer_num}O{1}_lr{lr0}dr{decay_rate}_bn{int(gnn_do_bn)}{int(linear_do_bn)}_gd{gnn_dropout}ld{linear_dropout}_{opt}_tw{criterion_weight[0]}_t{train_val_test_ratio[0]}{train_val_test_ratio[1]}rs{int(down_sampling)}{rs_NP_ratio}_epochs{epochs}_t{t_total:0.4f}.csv',
         mode='w', header=True, index=False)
     model_dir = f"{result_path}/{model_folder}/paras/{logs_subfolder}"
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
-    # torch.save(
-    #     model,
-    #     f'{model_dir}/{model_name}_paras{paras_num.get("Total")}_G{gnn_forward_layer_num}{gnn_reverse_layer_num}LA{1}L{linear_layer_num}O{1}_lr{lr0}dr{decay_rate}_bn{int(gnn_do_bn)}{int(linear_do_bn)}_gd{gnn_dropout}ld{linear_dropout}_{opt}_tw{criterion_weight[0]}_t{train_val_test_ratio[0]}{train_val_test_ratio[1]}rs{int(down_sampling)}{rs_NP_ratio}_epochs{epochs}.pth')
     torch.save(
         model,
         f'{model_dir}/{model_name}_paras{paras_num.get("Total")}_G{gnn_forward_layer_num}LA{1}L{linear_layer_num}O{1}_lr{lr0}dr{decay_rate}_bn{int(gnn_do_bn)}{int(linear_do_bn)}_gd{gnn_dropout}ld{linear_dropout}_{opt}_tw{criterion_weight[0]}_t{train_val_test_ratio[0]}{train_val_test_ratio[1]}rs{int(down_sampling)}{rs_NP_ratio}_epochs{epochs}.pth')
