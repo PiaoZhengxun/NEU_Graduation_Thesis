@@ -7,7 +7,7 @@ from sklearn.metrics import roc_auc_score
 
 
 def accuracy_mask(output, data, mask):
-    """The accuracy of GNNs (LB_GLAT)"""
+    """The accuracy of GNNs (LS_GLAT)"""
     pred = output.argmax(dim=1)  # Use the class with highest probability.
     correct = pred[mask] == data.y[mask]  # Check against ground-truth labels.
     return int(correct.sum()) / int(mask.sum())  # Derive ratio of correct predictions.
