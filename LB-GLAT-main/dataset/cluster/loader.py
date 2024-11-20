@@ -32,6 +32,7 @@ def get_dataset_list(seed):
     data_list = []
     for i in tqdm(range(len(node_list)), desc=f"Get Data List: "):
         data_list.append(get_data(class_list[i], edge_list[i], node_list[i]))
+        # print("Shape of data.edge_index before passing to model:", data_list.edge_index.shape)
     return data_list
 
 #see transpose loading bar
@@ -41,71 +42,144 @@ def show_loading_bar(percentage):
     bar = '█' * filled_length + '-' * (bar_length - filled_length)
     print(f"\r|{bar}| {percentage:.2f}% Complete", end="\r")
 
+#
+# def get_data(classes, edges, nodes):
+#     classes, edges, nodes = create_index(classes, edges, nodes)  # create index
+#
+#     ###########################################################
+#     print("\n")
+#     print("****************************************************************")
+#     print("dataset.cluster.loader.py >> get_data function undirected format")
+#     print("****************************************************************")
+#
+#     ##ValueError XXXX
+#     # reverse_edges = edges[[1,0], :]
+#     # edges = np.concatenate((edges, reverse_edges), axis =1 )
+#
+#     #test2
+#     # edges = np.array(edges)
+#     # reverse_edges = edges[[1, 0], :]
+#     # print("original edge shape:", edges.shape)
+#     # print("reversed edges shape:", reverse_edges.shape)
+#     #
+#     # edges = np.concatenate((edges, reverse_edges), axis=1)
+#
+#     #test3 ==> shape of 2N x 2
+#     # reverse_edges = edges[:, [1, 0]]
+#     # print("original edge shape:", edges.shape)
+#     # print("reversed edges shape:", reverse_edges.shape)
+#     # edges = np.concatenate((edges, reverse_edges), axis=0)
+#
+#     #use TRANSPOSE
+#     # print("original edge shape:", edges.shape)
+#     # edges = edges.T
+#     # reverse_edges = edges[[1, 0], :]
+#     # print("reversed edges shape:", reverse_edges.shape)
+#     # edges = np.concatenate((edges, reverse_edges), axis=1)
+#     # ###########################################################
+#
+#     ## transpose add tqdm loading bar
+#     print("디버그11111 original edge shape:", edges.shape)
+#     print("Transposing edges...")
+#     for i in range(101):
+#         show_loading_bar(i)
+#     edges = edges.T
+#     print("디버깅2222 ::Edges shape after transpose: ", edges.shape, "\nEdges transposed. Shape:", edges.shape)
+#     print("Creating reversed edges...")
+#     reverse_edges = np.array([edges[1], edges[0]])
+#     for i in range(101):
+#         show_loading_bar(i)
+#     print("디버깅 333333 \nReversed edges shape:", reverse_edges.shape)
+#     print("Concatenating edges...")
+#     edges = np.concatenate((edges, reverse_edges), axis=1)
+#     for i in range(101):
+#         show_loading_bar(i)
+#     print("디버깅 444444 \nConcatenation complete. Final edges shape:", edges.shape)
+#     ###########################################################
+#
+#     classes = classes[:, 1]
+#     nodes = nodes[:, 2:]
+#     class_tensor, edge_tensor, node_tensor = to_tensor(classes, edges, nodes)
+#     train_mask, val_mask, test_mask = get_process_mask(classes)
+#     train_mask = down_sampling_mask(classes, train_mask)  # under sampling
+#     train_mask_tensor, val_mask_tensor, test_mask_tensor = to_tensor_mask(train_mask, val_mask, test_mask)
+#     return Data(x=node_tensor, edge_index=edge_tensor, y=class_tensor,
+#                 train_mask=train_mask_tensor, val_mask=val_mask_tensor, test_mask=test_mask_tensor)
 
+def to_tensor(classes, edges, nodes):
+    # Check and ensure edges have shape [2, num_edges] before conversion
+    if edges.shape[0] != 2:
+        print("Reshaping edges inside to_tensor() to ensure [2, num_edges] shape...")
+        edges = edges.T  # Transpose if needed
+        print("Edges reshaped inside to_tensor() - New shape:", edges.shape)
+
+    # Convert edges to tensor and enforce shape consistency
+    edge_tensor = torch.tensor(edges, dtype=torch.long).contiguous()
+    print("Inside to_tensor - edge_tensor shape after conversion:", edge_tensor.shape)  # Debug print
+
+    # Convert classes and nodes to tensors
+    class_tensor = torch.tensor(classes, dtype=torch.long)
+    node_tensor = torch.tensor(nodes, dtype=torch.float)
+
+    return class_tensor, edge_tensor, node_tensor
 def get_data(classes, edges, nodes):
+    # Initial creation of index
     classes, edges, nodes = create_index(classes, edges, nodes)  # create index
 
-    ###########################################################
-    print("\n")
-    print("****************************************************************")
-    print("dataset.cluster.loader.py >> get_data function undirected format")
-    print("****************************************************************")
+    # Debug prints to trace the shapes and values
+    print("\n*************** DEBUGGING get_data FUNCTION ***************")
+    print("Initial edges shape (before processing):", edges.shape)
 
-    ##ValueError XXXX
-    # reverse_edges = edges[[1,0], :]
-    # edges = np.concatenate((edges, reverse_edges), axis =1 )
+    # Ensure edges have shape [2, num_edges]
+    if edges.shape[0] != 2:
+        print("Transposing edges to ensure shape [2, num_edges]...")
+        edges = edges.T
+        print("Edges shape after transpose:", edges.shape)
+    else:
+        print("Edges are already in shape [2, num_edges]")
 
-    #test2
-    # edges = np.array(edges)
-    # reverse_edges = edges[[1, 0], :]
-    # print("original edge shape:", edges.shape)
-    # print("reversed edges shape:", reverse_edges.shape)
-    #
-    # edges = np.concatenate((edges, reverse_edges), axis=1)
-
-    #test3 ==> shape of 2N x 2
-    # reverse_edges = edges[:, [1, 0]]
-    # print("original edge shape:", edges.shape)
-    # print("reversed edges shape:", reverse_edges.shape)
-    # edges = np.concatenate((edges, reverse_edges), axis=0)
-
-    #use TRANSPOSE
-    # print("original edge shape:", edges.shape)
-    # edges = edges.T
-    # reverse_edges = edges[[1, 0], :]
-    # print("reversed edges shape:", reverse_edges.shape)
-    # edges = np.concatenate((edges, reverse_edges), axis=1)
-    # ###########################################################
-
-    ## transpose add tqdm loading bar
-    print("디버그11111 original edge shape:", edges.shape)
-    print("Transposing edges...")
-    for i in range(101):
-        show_loading_bar(i)
-    edges = edges.T
-    print("디버깅2222 ::Edges shape after transpose: ", edges.shape, "\nEdges transposed. Shape:", edges.shape)
+    # Create reversed edges for undirected graph
     print("Creating reversed edges...")
     reverse_edges = np.array([edges[1], edges[0]])
-    for i in range(101):
-        show_loading_bar(i)
-    print("디버깅 333333 \nReversed edges shape:", reverse_edges.shape)
+    print("Reversed edges shape:", reverse_edges.shape)
+
+    # Concatenate original and reversed edges
     print("Concatenating edges...")
     edges = np.concatenate((edges, reverse_edges), axis=1)
-    for i in range(101):
-        show_loading_bar(i)
-    print("디버깅 444444 \nConcatenation complete. Final edges shape:", edges.shape)
-    ###########################################################
+    print("Final edges shape after concatenation:", edges.shape)
 
+
+    # Proceed with remaining data processing
     classes = classes[:, 1]
     nodes = nodes[:, 2:]
     class_tensor, edge_tensor, node_tensor = to_tensor(classes, edges, nodes)
+
+
     train_mask, val_mask, test_mask = get_process_mask(classes)
     train_mask = down_sampling_mask(classes, train_mask)  # under sampling
     train_mask_tensor, val_mask_tensor, test_mask_tensor = to_tensor_mask(train_mask, val_mask, test_mask)
-    return Data(x=node_tensor, edge_index=edge_tensor, y=class_tensor,
+
+    # Transpose edge_tensor to ensure correct shape [2, num_edges]
+    if edge_tensor.shape[0] != 2:
+        print("Transposing edge_tensor to correct shape for Data object...")
+        edge_tensor = edge_tensor.t()  # Transpose to shape [2, num_edges]
+
+    # Create Data object
+    data = Data(x=node_tensor, edge_index=edge_tensor, y=class_tensor,
                 train_mask=train_mask_tensor, val_mask=val_mask_tensor, test_mask=test_mask_tensor)
 
+    # Debug print to verify the shape of edge_index
+    print("Shape of data.edge_index in Data object:", data.edge_index.shape)
 
+    # Final debug prints for tensors
+    print("Final edge tensor shape:", edge_tensor.shape)
+    print("Final node tensor shape:", node_tensor.shape)
+    print("Final class tensor shape:", class_tensor.shape)
+
+    return data
+
+    # return Data(x=node_tensor, edge_index=edge_tensor, y=class_tensor,
+    #             train_mask=train_mask_tensor, val_mask=val_mask_tensor, test_mask=test_mask_tensor)
 def down_sampling_mask(classes, train_mask):
     """Narrow the positive and negative sample  gap"""
     down_sampling = get_config_option("dataset", "Elliptic", "down_sampling") == str(True)

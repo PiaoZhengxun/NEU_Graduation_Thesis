@@ -12,7 +12,7 @@ from tqdm import tqdm
 import torch_geometric
 import torch.backends.cudnn as cudnn
 
-from models.GNN.DeeperGCN.models import BiGENFCModel
+from models.GNN.DeeperGCN.models import SingleGraphSAGEModel
 from models.GNN.GAT.models import *
 from models.GNN.GraphSAGE.models import *
 from models.GNN.LB_GLAT.models import *
@@ -453,6 +453,27 @@ def creat_SAGELTLAFC():
 
 #######################################
 # # DeeperGCN
+
+def create_SingleGraphSAGEModel():
+    """
+    The model of GraphSAGE with Single Graph:
+        Single-graph + GraphSAGE + Fully Connection Layers
+    :return: model
+    """
+    return SingleGraphSAGEModel(
+        gnn_layer_num=gnn_forward_layer_num,  # Number of layers for the GraphSAGE model
+        linear_layer_num=linear_layer_num,
+        n_features=n_features,
+        n_classes=n_classes,
+        gnns_hidden=gnns_forward_hidden,  # Hidden layer sizes for GraphSAGE layers
+        linears_hidden=linears_hidden,  # Hidden layer sizes for fully connected layers
+        gnn_do_bn=gnn_do_bn,  # Apply batch normalization for GNN layers
+        linear_do_bn=linear_do_bn,  # Apply batch normalization for fully connected layers
+        gnn_dropout=gnn_dropout,  # Dropout for GNN layers
+        linear_dropout=linear_dropout,  # Dropout for fully connected layers
+        device=device,
+        bias=bias
+    )
 # def creat_BiGENFCModel():
 #     """
 #     The model of DeeperGCN Folder:

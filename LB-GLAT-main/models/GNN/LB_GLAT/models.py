@@ -51,6 +51,11 @@ class LBGLATModel(nn.Module):
                                 do_bn=linear_do_bn, dropout=linear_dropout, bias=bias)  # path 2【Forward】
 
     def forward(self, x, edge_index, mask):
+
+        #debugging
+        print("_*_*_*__*_*_*_*_*_*_*_*______________________************************************************************")
+        print(f"Input x shape: {x.shape}")
+        print(f"Input mask shape (if any): {mask.shape if mask is not None else None}")
         # Convert the edge_index to a coo sparse matrix and calculate the D-1*A  # transpose matrix
         coo_adj = norm_adj(edgeIndex2CooAdj(x.shape[0], edge_index))
         # coo_adj_T = sp.coo_matrix(coo_adj.A.T)
