@@ -51,7 +51,7 @@ def get_data(classes, edges, nodes):
     nodes = nodes[:, 2:]
     class_tensor, edge_tensor, node_tensor = to_tensor(classes, edges, nodes)
     train_mask, val_mask, test_mask = get_process_mask(classes)
-    train_mask = down_sampling_mask(classes, train_mask)
+    train_mask = down_sampling_mask(classes, train_mask) #changed
     train_mask_tensor, val_mask_tensor, test_mask_tensor = to_tensor_mask(train_mask, val_mask, test_mask)
     if edge_tensor.shape[0] != 2:
         edge_tensor = edge_tensor.t()
@@ -67,7 +67,7 @@ def down_sampling_mask(classes, train_mask):
         N_num = (classes[train_mask] == 1).sum()
         if N_num <= math.floor(P_num * rs_NP_ratio):
             return train_mask
-        Neg_index = np.where(classes[train_mask] == 1)[0]
+        Neg_index = np.where(classes == 1)[0]
         Neg_abandon_index = random.sample(list(Neg_index), N_num - math.floor(P_num * rs_NP_ratio))
         Neg_mask = np.full(classes.shape, True, dtype=bool)
         Neg_mask[Neg_abandon_index] = False
