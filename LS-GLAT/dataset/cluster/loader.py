@@ -41,6 +41,7 @@ def to_tensor(classes, edges, nodes):
     return class_tensor, edge_tensor, node_tensor
 
 def get_data(classes, edges, nodes):
+    # 2 x 2n single graph
     classes, edges, nodes = create_index(classes, edges, nodes)
     if edges.shape[0] != 2:
         edges = edges.T
