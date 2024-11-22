@@ -28,13 +28,26 @@ data_list = get_dataset_list(seed)
 print(f"Debug: model_name before selection = {model_name}")
 
 if model_name in ["LS_GLAT"]:
-    model = creat_LSGLAT()
+    model = create_LSGLAT()
     print(f"Selected model_name: {model_name}")
-elif model_name in ["SINGLE_GRAPH_SAGE"]:
-    model = create_SingleGraphSAGEModel()
+# elif model_name in ["SINGLE_GRAPH_SAGE"]:
+#     model = create_SingleGraphSAGEModel()
+#     print(f"Selected model_name: {model_name}")
+# elif model_name in ["GATOnlyModel"]:
+#     model =  create_GATOnlyModel()
+#     print(f"Selected model_name: {model_name}")
+elif model_name in ["GATNoFCModel"]:
+    model =  create_GATNoFCModel()
+    print(f"Selected model_name: {model_name}")
+elif model_name in ["GATNoBidirectionalGraphModel"]:
+    model =  create_GATNoBidirectionalGraphModel()
+    print(f"Selected model_name: {model_name}")
+elif model_name in ["GATNoLTLAFCModel"]:
+    model =  create_GATNoLTLAFCModel()
     print(f"Selected model_name: {model_name}")
 else:
     raise NoModelError("No model is specified during training.")
+
 
 # 모델 파라미터 출력
 paras_num = get_paras_num(model, model_name)

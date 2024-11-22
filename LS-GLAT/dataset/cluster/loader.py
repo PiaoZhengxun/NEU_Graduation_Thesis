@@ -26,6 +26,18 @@ def get_dataset_list(seed):
         data_list.append(get_data(class_list[i], edge_list[i], node_list[i]))
     return data_list
 
+def get_dataset_list_compare(seed):
+    setup_seed(seed)
+    class_list, edge_list, node_list = du.get_dataset_all_time_np_list()
+    time_end = int(get_config_option("dataset", "Elliptic", "time_end"))
+    class_list = class_list[:(time_end+1)]
+    edge_list = edge_list[:(time_end + 1)]
+    node_list = node_list[:(time_end + 1)]
+    data_list = []
+    for i in tqdm(range(len(node_list)), desc=f"Get Data List: "):
+        data_list.append(get_data_compare(class_list[i], edge_list[i], node_list[i]))
+    return data_list
+
 def show_loading_bar(percentage):
     bar_length = 50
     filled_length = int(bar_length * percentage // 100)
@@ -58,6 +70,24 @@ def get_data(classes, edges, nodes):
     data = Data(x=node_tensor, edge_index=edge_tensor, y=class_tensor,
                 train_mask=train_mask_tensor, val_mask=val_mask_tensor, test_mask=test_mask_tensor)
     return data
+
+def get_data_compare(classes, edges, nodes):
+    classes, edges, nodes = create_index(classes, edges, nodes)  # create index
+    classes = classes[:, 1]
+    nodes = nodes[:, 2:]
+    class_tensor, edge_tensor, node_tensor = to_tensor_compare(classes, edges, nodes)
+    train_mask, val_mask, test_mask = get_process_mask(classes)
+    train_mask = down_sampling_mask(classes, train_mask)  # under sampling
+    train_mask_tensor, val_mask_tensor, test_mask_tensor = to_tensor_mask(train_mask, val_mask, test_mask)
+    return Data(x=node_tensor, edge_index=edge_tensor, y=class_tensor,
+                train_mask=train_mask_tensor, val_mask=val_mask_tensor, test_mask=test_mask_tensor)
+
+def to_tensor_compare(classes, edges, nodes):
+    class_tensor = torch.LongTensor(classes)
+    edge_tensor = torch.LongTensor(edges.transpose())
+    node_tensor = torch.Tensor(nodes)
+    return class_tensor, edge_tensor, node_tensor
+
 
 def down_sampling_mask(classes, train_mask):
     down_sampling = get_config_option("dataset", "Elliptic", "down_sampling") == str(True)

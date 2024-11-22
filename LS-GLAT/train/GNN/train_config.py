@@ -78,7 +78,104 @@ use_cuda = not no_cuda and torch.cuda.is_available()
 device = torch.device('cuda' if use_cuda else 'cpu')
 print("Cuda Available:{}, use {}!".format(use_cuda, device))
 
-def creat_LSGLAT():
+
+"""
+1. Bidirectional Graph + GAT + Long Term Layer Attention (GATNoFCModel)
+2. GAT + Full Connection Layers + Long Term Layer Attention (GATNoSingleGraphModel)
+3. Bidirectional Graph + GAT + Full Connection Layers (GATNoLTLAFCModel)
+4. Bidirectional Graph + GAT + Long Term Layer Attention + Full Connection Layers (LSGLATModel)
+"""
+def create_GATNoFCModel():
+    """
+    1. Bidirectional Graph + GAT + Long Term Layer Attention
+    """
+    return GATNoFCModel(
+        gnn_forward_layer_num=gnn_forward_layer_num,
+        # linear_layer_num=linear_layer_num,
+        n_features=n_features,
+        # n_classes=n_classes,
+        gnns_forward_hidden=gnns_forward_hidden,
+        # linears_hidden=linears_hidden,
+        project_hidden=project_hidden,
+        gnn_do_bn=gnn_do_bn,
+        # linear_do_bn=linear_do_bn,
+        gnn_dropout=gnn_dropout,
+        # linear_dropout=linear_dropout,
+        tsf_dim=tsf_dim,
+        tsf_mlp_hidden=tsf_mlp_hidden,
+        tsf_depth=tsf_depth,
+        tsf_heads=tsf_heads,
+        tsf_head_dim=tsf_head_dim,
+        tsf_dropout=tsf_dropout,
+        gt_emb_dropout=gt_emb_dropout,
+        gt_pool=gt_pool,
+        device=device,
+        bias=bias
+    )
+
+
+def create_GATNoBidirectionalGraphModel():
+    """
+    2. GAT + Full Connection Layers + Long Term Layer Attention
+    """
+    return GATNoBidirectionalGraphModel(
+        gnn_forward_layer_num=gnn_forward_layer_num,
+        linear_layer_num=linear_layer_num,
+        n_features=n_features,
+        n_classes=n_classes,
+        gnns_forward_hidden=gnns_forward_hidden,
+        linears_hidden=linears_hidden,
+        project_hidden=project_hidden,
+        gnn_do_bn=gnn_do_bn,
+        linear_do_bn=linear_do_bn,
+        gnn_dropout=gnn_dropout,
+        linear_dropout=linear_dropout,
+        tsf_dim=tsf_dim,
+        tsf_mlp_hidden=tsf_mlp_hidden,
+        tsf_depth=tsf_depth,
+        tsf_heads=tsf_heads,
+        tsf_head_dim=tsf_head_dim,
+        tsf_dropout=tsf_dropout,
+        gt_emb_dropout=gt_emb_dropout,
+        gt_pool=gt_pool,
+        device=device,
+        bias=bias
+    )
+
+
+def create_GATNoLTLAFCModel():
+    """
+    3. Bidirectional Graph + GAT + Full Connection Layers
+    """
+    return GATNoLTLAFCModel(
+        gnn_forward_layer_num=gnn_forward_layer_num,
+        linear_layer_num=linear_layer_num,
+        n_features=n_features,
+        n_classes=n_classes,
+        gnns_forward_hidden=gnns_forward_hidden,
+        linears_hidden=linears_hidden,
+        # project_hidden=project_hidden,
+        gnn_do_bn=gnn_do_bn,
+        linear_do_bn=linear_do_bn,
+        gnn_dropout=gnn_dropout,
+        linear_dropout=linear_dropout,
+        # tsf_dim=tsf_dim,
+        # tsf_mlp_hidden=tsf_mlp_hidden,
+        # tsf_depth=tsf_depth,
+        # tsf_heads=tsf_heads,
+        # tsf_head_dim=tsf_head_dim,
+        # tsf_dropout=tsf_dropout,
+        # gt_emb_dropout=gt_emb_dropout,
+        # gt_pool=gt_pool,
+        device=device,
+        bias=bias
+    )
+
+
+def create_LSGLAT():
+    """
+    4. Bidirectional Graph + GAT + Long Term Layer Attention + Full Connection Layers
+    """
     return LSGLATModel(
         gnn_forward_layer_num=gnn_forward_layer_num,
         linear_layer_num=linear_layer_num,
@@ -103,27 +200,27 @@ def creat_LSGLAT():
         bias=bias
     )
 
-def create_SingleGraphSAGEModel():
-    return SingleGraphSAGEModel(
-        gnn_layer_num=gnn_forward_layer_num,
-        linear_layer_num=linear_layer_num,
-        n_features=n_features,
-        n_classes=n_classes,
-        gnns_hidden=gnns_forward_hidden,
-        linears_hidden=linears_hidden,
-        gnn_do_bn=gnn_do_bn,
-        linear_do_bn=linear_do_bn,
-        gnn_dropout=gnn_dropout,
-        linear_dropout=linear_dropout,
-        device=device,
-        bias=bias,
-        project_hidden=project_hidden,
-        tsf_dim=tsf_dim,
-        tsf_mlp_hidden=tsf_mlp_hidden,
-        tsf_depth=tsf_depth,
-        tsf_heads=tsf_heads,
-        tsf_head_dim=tsf_head_dim,
-        tsf_dropout=tsf_dropout,
-        gt_emb_dropout=gt_emb_dropout,
-        gt_pool=gt_pool
-    )
+# def create_SingleGraphSAGEModel():
+#     return SingleGraphSAGEModel(
+#         gnn_layer_num=gnn_forward_layer_num,
+#         linear_layer_num=linear_layer_num,
+#         n_features=n_features,
+#         n_classes=n_classes,
+#         gnns_hidden=gnns_forward_hidden,
+#         linears_hidden=linears_hidden,
+#         gnn_do_bn=gnn_do_bn,
+#         linear_do_bn=linear_do_bn,
+#         gnn_dropout=gnn_dropout,
+#         linear_dropout=linear_dropout,
+#         device=device,
+#         bias=bias,
+#         project_hidden=project_hidden,
+#         tsf_dim=tsf_dim,
+#         tsf_mlp_hidden=tsf_mlp_hidden,
+#         tsf_depth=tsf_depth,
+#         tsf_heads=tsf_heads,
+#         tsf_head_dim=tsf_head_dim,
+#         tsf_dropout=tsf_dropout,
+#         gt_emb_dropout=gt_emb_dropout,
+#         gt_pool=gt_pool
+#     )
