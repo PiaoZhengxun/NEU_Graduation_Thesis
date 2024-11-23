@@ -27,6 +27,7 @@ def get_dataset_list(seed):
     return data_list
 
 def get_dataset_list_compare(seed):
+    print("COMPARE data")
     setup_seed(seed)
     class_list, edge_list, node_list = du.get_dataset_all_time_np_list()
     time_end = int(get_config_option("dataset", "Elliptic", "time_end"))
@@ -53,6 +54,7 @@ def to_tensor(classes, edges, nodes):
     return class_tensor, edge_tensor, node_tensor
 
 def get_data(classes, edges, nodes):
+    print("using GET DATA")
     # 2 x 2n single graph
     classes, edges, nodes = create_index(classes, edges, nodes)
     if edges.shape[0] != 2:

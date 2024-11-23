@@ -7,7 +7,7 @@ from models.GNN.common import *
 """
 1. Bidirectional Graph + GAT + Long Term Layer Attention (GATNoFCModel)
 2. GAT + Full Connection Layers + Long Term Layer Attention (GATNoSingleGraphModel)
-3. Bidirectional Graph + GAT + Full Connection Layers (GATNoLTLAFCModel)
+3. Bidirectional Graph + GAT + Full Connection Layers (GATNoLTLAFwCModel)
 4. Bidirectional Graph + GAT + Long Term Layer Attention + Full Connection Layers (LSGLATModel)
 """
 

@@ -16,6 +16,7 @@ class MLPModel(nn.Module):
         return self.softmax(self.mlp(x))
 
 def train_mlp(model: MLPModel, train_x, train_y, epochs: int, learning_rate: float, device: torch.device):
+
     train_x, train_y = train_x.to(device), train_y.to(device)
     model.to(device)
     criterion = nn.CrossEntropyLoss()
@@ -29,11 +30,10 @@ def train_mlp(model: MLPModel, train_x, train_y, epochs: int, learning_rate: flo
         loss.backward()
         optimizer.step()
         scheduler.step()
-        current_lr = scheduler.get_last_lr()[0]
-        if (epoch + 1) % 10 == 0 or epoch == epochs - 1:
-            print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.item()}, Learning Rate: {current_lr}")
+        # current_lr = scheduler.get_last_lr()[0]
+        # if (epoch + 1) % 10 == 0 or epoch == epochs - 1:
+        #     print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.item()}, Learning Rate: {current_lr}")
     return model
-
 def test_mlp(model: MLPModel, test_x, test_y, device: torch.device):
     test_x, test_y = test_x.to(device), test_y.to(device)
     model.to(device)

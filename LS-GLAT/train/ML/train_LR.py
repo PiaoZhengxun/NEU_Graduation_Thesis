@@ -76,8 +76,6 @@ if __name__ == '__main__':
     config = load_config()
     train_x, train_y, test_x, test_y = get_train_test_np()
 
-    print("Running Logistic Regression...")
     run_logistic_regression(train_x, train_y, test_x, test_y, config)
 
-    print("\nRunning MLP...")
     run_mlp(train_x, train_y, test_x, test_y, config)
