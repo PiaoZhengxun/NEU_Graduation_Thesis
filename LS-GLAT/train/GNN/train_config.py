@@ -62,12 +62,21 @@ epochs = args.epochs
 model_name = GNN_config.get("GNN", "model_name")
 model_folder = GNN_config.get("GNN", "model_folder")
 project_hidden = int(GNN_config.get("LTLA", "project_hidden"))
-tsf_dim = int(GNN_config.get("LTLA", "tsf_dim"))
-tsf_mlp_hidden = int(GNN_config.get("LTLA", "tsf_mlp_hidden"))
-tsf_depth = int(GNN_config.get("LTLA", "tsf_depth"))
+
+# tsf_dim = int(GNN_config.get("LTLA", "tsf_dim"))
+# tsf_mlp_hidden = int(GNN_config.get("LTLA", "tsf_mlp_hidden"))
+# tsf_depth = int(GNN_config.get("LTLA", "tsf_depth"))
+# tsf_head_dim = int(GNN_config.get("LTLA", "tsf_head_dim"))
+# tsf_dropout = float(GNN_config.get("LTLA", "tsf_dropout"))
+
+tsf_dim = int(GNN_config.get("LTLA", "tsf_dim").split("#")[0].strip())
+tsf_mlp_hidden = int(GNN_config.get("LTLA", "tsf_mlp_hidden").split("#")[0].strip())
+tsf_depth = int(GNN_config.get("LTLA", "tsf_depth").split("#")[0].strip())
+tsf_head_dim = int(GNN_config.get("LTLA", "tsf_head_dim").split("#")[0].strip())
+tsf_dropout = float(GNN_config.get("LTLA", "tsf_dropout").split("#")[0].strip())
+
+
 tsf_heads = int(GNN_config.get("LTLA", "tsf_heads"))
-tsf_head_dim = int(GNN_config.get("LTLA", "tsf_head_dim"))
-tsf_dropout = float(GNN_config.get("LTLA", "tsf_dropout"))
 gt_emb_dropout = float(GNN_config.get("LTLA", "gt_emb_dropout"))
 gt_pool = GNN_config.get("LTLA", "gt_pool")
 

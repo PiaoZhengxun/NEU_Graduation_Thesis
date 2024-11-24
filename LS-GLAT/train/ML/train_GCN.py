@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import torch
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from torch_geometric.nn import GCNConv
 from dataset.ML.loader import get_train_test_np, get_edge_index
 from utils.config_utils import get_config_option
@@ -36,7 +36,6 @@ def train_gcn(model, train_x, train_y, edge_index, epochs, learning_rate, device
         loss = criterion(out, train_y)
         loss.backward()
         optimizer.step()
-        # print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.item():.4f}")
 
 
 def test_gcn(model, test_x, test_y, edge_index, device):
@@ -45,18 +44,21 @@ def test_gcn(model, test_x, test_y, edge_index, device):
 
     model.eval()
     with torch.no_grad():
-        predictions = model(test_x, edge_index).argmax(dim=1)
-    metrics = evaluate_metrics(test_y.cpu().numpy(), predictions.cpu().numpy())
+        outputs = model(test_x, edge_index)
+        predictions = outputs.argmax(dim=1)
+        probabilities = outputs[:, 1]  # Assuming binary classification
+    metrics = evaluate_metrics(test_y.cpu().numpy(), predictions.cpu().numpy(), probabilities.cpu().numpy())
     print_metrics("GCN", metrics)
     return metrics
 
 
-def evaluate_metrics(y_true, y_pred):
+def evaluate_metrics(y_true, y_pred, y_prob):
     metrics = {
         "accuracy": accuracy_score(y_true, y_pred),
         "precision": precision_score(y_true, y_pred, average=None, zero_division=0),
         "recall": recall_score(y_true, y_pred, average=None, zero_division=0),
         "f1_score": f1_score(y_true, y_pred, average=None, zero_division=0),
+        "auc": roc_auc_score(y_true, y_prob),
     }
     return metrics
 
@@ -67,7 +69,8 @@ def print_metrics(model_name, metrics):
         f"Accuracy={metrics['accuracy']:.4f}, "
         f"Precision={metrics['precision'][0]:.4f}/{metrics['precision'][1]:.4f}, "
         f"Recall={metrics['recall'][0]:.4f}/{metrics['recall'][1]:.4f}, "
-        f"F1={metrics['f1_score'][0]:.4f}/{metrics['f1_score'][1]:.4f}"
+        f"F1={metrics['f1_score'][0]:.4f}/{metrics['f1_score'][1]:.4f}, "
+        f"AUC={metrics['auc']:.4f}"
     )
 
 
